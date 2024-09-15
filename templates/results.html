@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Analysis Tool</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        .highlight-common {
+            background-color: green;
+            color: white;
+            border-radius: 9999px; /* Rounded pill */
+            padding: 0.2rem 0.6rem;
+        }
+        .highlight-missing {
+            background-color: red;
+            color: white;
+            border-radius: 9999px; /* Rounded pill */
+            padding: 0.2rem 0.6rem;
+        }
+        .highlight-unique {
+            background-color: blue;
+            color: white;
+            border-radius: 9999px; /* Rounded pill */
+            padding: 0.2rem 0.6rem;
+        }
+
+        /* Fixed header for Job Description and Resume */
+        .header-fixed {
+            position: relative;
+            top: 0;
+            background-color: white;
+            z-index: 10;
+            padding: 1rem 0;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Style for shadow effect on all components */
+        .component-box {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Ensure the container does not cover the text */
+        .scrollable-container {
+            overflow-y: auto;
+            max-height: 96vh;
+        }
+    </style>
+    <!-- Google Charts -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <!-- html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
+
+</head>
+<body class="flex flex-col min-h-screen">
+
+   <!-- Header -->
+    <header class="bg-gray-800 text-white py-4 flex justify-between items-center">
+        <div class="container mx-auto flex justify-between items-center">
+            <!-- Back Button on the Left -->
+            <button onclick="goBack()" class="bg-gray-700 text-white py-2 px-4 rounded hover:bg-gray-600">
+                ← Back
+            </button>
+            <h1 class="text-3xl font-bold text-center">Job Keyword Analysis Dashboard</h1>
+            <!-- Export Button on the Right -->
+            <button onclick="exportPDF()" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500">
+                Export PDF
+            </button>
+        </div>
+    </header>
+
+    <main id="report-content"  class="flex-grow container mx-auto py-8">
+
+        <div class="flex items-center justify-between mb-6">
+             <!-- Logo on the left side -->
+            <div class="flex items-center">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo"
+                     class="w-48 h-auto mr-4">
+
+            </div>
+
+            <!-- Legend Section -->
+            <div class="flex space-x-4">
+                <div class="flex items-center">
+                    <span class="w-4 h-4 bg-green-500 rounded-full mr-2"></span>
+                    <span>Matching Keywords</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-4 h-4 bg-red-500 rounded-full mr-2"></span>
+                    <span>Missing Keywords</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-4 h-4 bg-blue-500 rounded-full mr-2"></span>
+                    <span>Keywords</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section (if available) -->
+        {% if match_score %}
+        <div class="space-y-8">
+            <h2 class="text-xl font-bold">Analysis Results</h2>
+            <div class="p-6 rounded-lg shadow-lg component-box">
+
+                <!-- Grid with Gauge and Missing/Matching Keywords -->
+                <div class="grid grid-cols-2 gap-8 items-start">
+                    <!-- Gauge Chart for Match Score -->
+                    <div id="gauge-container" class="flex items-center justify-center">
+                        <div id="gauge-chart" style="width: 250px; height: 250px;"></div>
+                    </div>
+
+                    <!-- Missing and Matching Keywords (Side by Side) -->
+                    <div class="bg-white p-4 rounded-lg component-box">
+                        <!-- Matching Keywords -->
+                        <h4 class="text-lg font-bold mb-2">Matching Keywords</h4>
+                        <ul id="matching-keywords-list" class="flex flex-wrap gap-2">
+                            {% for keyword in common_keywords %}
+                                <li class="highlight-common">{{ keyword }}</li>
+                            {% endfor %}
+                        </ul>
+
+                        <!-- Missing Keywords -->
+                        <h4 class="text-lg font-bold mb-2 mt-4">Missing Keywords</h4>
+                        <ul id="missing-keywords-list" class="flex flex-wrap gap-2">
+                            {% for keyword in missing_keywords %}
+                                <li class="highlight-missing">{{ keyword }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Fixed Headers Outside the Scrollable Container -->
+            <div class="grid grid-cols-2 gap-8">
+                <div class="header-fixed">
+                    <h2 class="text-xl font-bold">Job Description</h2>
+                </div>
+                <div class="header-fixed">
+                    <h2 class="text-xl font-bold">Resume</h2>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-8 scrollable-container">
+                <!-- Job Description Column -->
+                <div class="bg-white p-6 rounded-lg shadow-lg component-box">
+                    <div id="job-description" class="whitespace-pre-wrap">{{ job_description | safe }}</div>
+                </div>
+
+                <!-- Resume Column -->
+                <div class="bg-white p-6 rounded-lg shadow-lg component-box">
+                    <div id="resume-text" class="whitespace-pre-wrap">{{ resume_text | safe }}</div>
+                </div>
+            </div>
+
+            <!-- Keywords Highlight Section -->
+            <div class="p-6 rounded-lg shadow-lg component-box">
+                <!-- Job Description Keywords: common + missing -->
+                <h4 class="text-lg font-bold mb-2 mt-6">Job Description Keywords</h4>
+                <div id="job-keywords" class="flex flex-wrap gap-2">
+                    {% for keyword in common_keywords %}
+                        <!-- Common Keywords in green -->
+                        <span class="highlight-common">{{ keyword }}</span>
+                    {% endfor %}
+                    {% for keyword in missing_keywords %}
+                        <!-- Missing Keywords in red -->
+                        <span class="highlight-missing">{{ keyword }}</span>
+                    {% endfor %}
+                </div>
+
+                <!-- Resume Keywords: common + unique resume -->
+                <h4 class="text-lg font-bold mb-2 mt-6">Resume Keywords</h4>
+                <div id="resume-keywords" class="flex flex-wrap gap-2">
+                    {% for keyword in common_keywords %}
+                        <!-- Common Keywords in green -->
+                        <span class="highlight-common">{{ keyword }}</span>
+                    {% endfor %}
+                    {% for keyword in resume_keywords %}
+                        {% if keyword not in common_keywords %}
+                            <!-- Unique Resume Keywords in blue -->
+                            <span class="highlight-unique">{{ keyword }}</span>
+                        {% endif %}
+                    {% endfor %}
+    </div>
+</div>
+
+
+        </div>
+        {% endif %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-4">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2024 Job Analysis Tool. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript for Google Gauge Chart and highlighting keywords dynamically -->
+    <script>
+        // Go back to the previous page
+    function goBack() {
+        window.history.back();
+    }
+
+    // Export the page as a PDF using html2pdf
+    function exportPDF() {
+        // Get the current timestamp
+        const now = new Date();
+        const timestamp = now.getFullYear() + "-" +
+                          ("0" + (now.getMonth() + 1)).slice(-2) + "-" +
+                          ("0" + now.getDate()).slice(-2) + "_" +
+                          ("0" + now.getHours()).slice(-2) + "-" +
+                          ("0" + now.getMinutes()).slice(-2) + "-" +
+                          ("0" + now.getSeconds()).slice(-2);
+
+        // Set the filename with the timestamp
+        const filename = `job-analysis-report_${timestamp}.pdf`;
+
+        var element = document.getElementById('report-content');
+        var opt = {
+            margin:       0.5,
+            filename:     filename,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+        html2pdf().from(element).set(opt).save();
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const jobKeywords = {{ job_keywords | tojson | safe }};
+        const resumeKeywords = {{ resume_keywords | tojson | safe }};
+        const commonKeywords = {{ common_keywords | tojson | safe }};
+        const missingKeywords = {{ missing_keywords | tojson | safe }};
+        const matchScore = {{ match_score }};
+
+        // Function to escape special regex characters in the keyword
+        function escapeRegex(keyword) {
+            return keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // Function to safely highlight keywords ensuring whole word matching
+        function highlightText(containerId, keywords, highlightClass) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            let content = container.innerHTML;  // Get the existing HTML content
+
+            // Loop through keywords and replace them with highlighted spans
+            keywords.forEach(keyword => {
+                const safeKeyword = escapeRegex(keyword);
+                const regex = new RegExp(`\\b(${safeKeyword})\\b(?![^<]*>)`, 'gi');  // Ensure whole word match
+                content = content.replace(regex, `<mark class="${highlightClass}">$1</mark>`);
+            });
+
+            // Update the HTML content with the highlighted text
+            container.innerHTML = content;
+        }
+
+        // Apply the highlighting to the job description and resume
+        highlightText('job-description', jobKeywords, 'highlight-unique');
+        highlightText('resume-text', resumeKeywords, 'highlight-unique');
+        highlightText('job-description', commonKeywords, 'highlight-common');
+        highlightText('resume-text', commonKeywords, 'highlight-common');
+        highlightText('job-description', missingKeywords, 'highlight-missing');
+
+        // Load the Google Charts for the Gauge
+        google.charts.load('current', {'packages':['gauge']});
+        google.charts.setOnLoadCallback(drawGauge);
+
+        function drawGauge() {
+            const data = google.visualization.arrayToDataTable([
+                ['Label', 'Value'],
+                ['Match %', matchScore]
+            ]);
+
+            const options = {
+                width: 250,
+                height: 250,
+                redFrom: 0,
+                redTo: 50,
+                yellowFrom: 50,
+                yellowTo: 80,
+                greenFrom: 80,
+                greenTo: 100,
+                minorTicks: 5,
+                max: 100,
+                animation: {
+                    duration: 1000,
+                    easing: 'out'
+                },
+                format: '##%'
+            };
+
+            const chart = new google.visualization.Gauge(document.getElementById('gauge-chart'));
+            chart.draw(data, options);
+        }
+    });
+    </script>
+
+</body>
+</html>

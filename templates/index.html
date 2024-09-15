@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Analysis Tool</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .highlight-common {
+            background-color: green;
+            color: white;
+        }
+        .highlight-missing {
+            background-color: red;
+            color: white;
+        }
+        .highlight-unique {
+            background-color: blue;
+            color: white;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-gray-800 text-white py-4">
+        <div class="container mx-auto">
+            <h1 class="text-3xl font-bold text-center">Job Analysis Tool</h1>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow container mx-auto py-8">
+        <!-- Form Section -->
+        <form method="POST" enctype="multipart/form-data" class="mb-8">
+            <div class="mb-4">
+                <label for="url" class="block text-lg font-medium text-gray-700">Job URL:</label>
+                <input type="text" id="url" name="url" placeholder="Enter Job URL" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+
+            <div class="mb-4">
+                <label for="file" class="block text-lg font-medium text-gray-700">Upload Resume:</label>
+                <input type="file" id="file" name="file" accept=".pdf,.docx" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
+                Analyze
+            </button>
+        </form>
+
+        <!-- Results Section (if available) -->
+        {% if match_score %}
+        <div class="space-y-8">
+            <div class="bg-gray-100 p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-bold">Analysis Results</h2>
+                <p class="mt-2">Match Score: <span class="font-semibold">{{ match_score }}%</span></p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-8">
+                <!-- Job Description Column -->
+                <div class="bg-white p-6 rounded-lg shadow-lg overflow-y-auto max-h-96">
+                    <h2 class="text-xl font-bold mb-4">Job Description</h2>
+                    <div id="job-description" class="whitespace-pre-wrap">{{ job_description | safe }}</div>
+                </div>
+
+                <!-- Resume Column -->
+                <div class="bg-white p-6 rounded-lg shadow-lg overflow-y-auto max-h-96">
+                    <h2 class="text-xl font-bold mb-4">Resume</h2>
+                    <div id="resume-text" class="whitespace-pre-wrap">{{ resume_text | safe }}</div>
+                </div>
+            </div>
+
+            <!-- Keywords Highlight Section -->
+            <div class="bg-gray-100 p-6 rounded-lg shadow-lg">
+                <h4 class="text-lg font-bold mb-2">Common Keywords</h4>
+                <div id="common-keywords" class="flex flex-wrap gap-2">
+                    {% for keyword in common_keywords %}
+                        <span class="highlight-common px-2 py-1 rounded">{{ keyword }}</span>
+                    {% endfor %}
+                </div>
+
+                <h4 class="text-lg font-bold mb-2 mt-6">Missing Keywords</h4>
+                <div id="missing-keywords" class="flex flex-wrap gap-2">
+                    {% for keyword in missing_keywords %}
+                        <span class="highlight-missing px-2 py-1 rounded">{{ keyword }}</span>
+                    {% endfor %}
+                </div>
+
+                <h4 class="text-lg font-bold mb-2 mt-6">Job Description Keywords</h4>
+                <div id="job-keywords" class="flex flex-wrap gap-2">
+                    {% for keyword in job_keywords %}
+                        <span class="highlight-unique px-2 py-1 rounded">{{ keyword }}</span>
+                    {% endfor %}
+                </div>
+
+                <h4 class="text-lg font-bold mb-2 mt-6">Resume Keywords</h4>
+                <div id="resume-keywords" class="flex flex-wrap gap-2">
+                    {% for keyword in resume_keywords %}
+                        <span class="highlight-unique px-2 py-1 rounded">{{ keyword }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-4">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2024 Job Analysis Tool. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript for highlighting keywords dynamically in the text -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const jobKeywords = {{ job_keywords | tojson }};
+            const resumeKeywords = {{ resume_keywords | tojson }};
+            const commonKeywords = {{ common_keywords | tojson }};
+            const missingKeywords = {{ missing_keywords | tojson }};
+
+            // Function to highlight keywords in the given text
+            function highlightText(containerId, keywords, highlightClass) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+
+                let content = container.innerHTML;
+
+                keywords.forEach(keyword => {
+                    const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+                    content = content.replace(regex, `<span class="${highlightClass}">${keyword}</span>`);
+                });
+
+                container.innerHTML = content;
+            }
+
+            // Highlight keywords in job description and resume
+            highlightText('job-description', jobKeywords, 'highlight-unique');
+            highlightText('resume-text', resumeKeywords, 'highlight-unique');
+            highlightText('job-description', commonKeywords, 'highlight-common');
+            highlightText('resume-text', commonKeywords, 'highlight-common');
+            highlightText('job-description', missingKeywords, 'highlight-missing');
+        });
+    </script>
+
+</body>
+</html>
