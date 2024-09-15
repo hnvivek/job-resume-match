@@ -22,8 +22,8 @@ load_dotenv()
 
 # Now you can access the variables from the .env file
 groq_api_key = os.getenv("GROQ_API_KEY")
-model = os.getenv("model")
-max_tokens = int(os.getenv("max_tokens"))
+model = os.getenv("MODEL")
+max_tokens = int(os.getenv("MAX_TOKENS"))
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
