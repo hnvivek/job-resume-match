@@ -13,11 +13,11 @@ COPY . .
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Make start.sh executable
+RUN chmod +x start.sh
+
 # Expose the port your app runs on (note: Railway will automatically bind a dynamic port)
 EXPOSE 5000
 
-# Define environment variable to ensure the correct Flask app is used
-ENV FLASK_APP=app.py
-
-# Ensure the app runs on the port provided by Railway dynamically
-CMD ["gunicorn", "-b", "0.0.0.0:$PORT", "app:app"]
+# Use the shell script as the entrypoint
+CMD ["./start.sh"]
