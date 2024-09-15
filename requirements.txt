@@ -7,3 +7,6 @@ docx2txt==0.8
 flask==3.0.3
 BeautifulSoup4==4.12.3
 gunicorn==20.1.0
+redis==5.0.8
+tiktoken==0.7.0
+nltk==3.9.1

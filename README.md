@@ -1,6 +1,8 @@
 # Job Resume Match
 
-A Flask web application that helps users match job descriptions with resumes by extracting keywords and calculating match scores.
+A LLM based web application that helps users match job descriptions with resumes by 
+extracting 
+keywords and calculating match scores.
 
 ## Features
 
@@ -32,9 +34,15 @@ source .venv/bin/activate  # On Windows use `.venv\Scripts\activate`
 
 `pip install -r requirements.txt`
 
-4. Create .env file and set 
-`export GROQ_API_KEY= <YOUR API>`
+4. Create .env file and set these below creds
 
+`GROQ_API_KEY= <YOUR API>`
+
+`MODEL = <YOUR OPEN SOURCE MODLE> (EX: gemma2-9b-it)`
+
+`MAX_TOKENS= <YOUR MAX TOKEN>`
+
+You can can get API key and model names from [GROQ](https://console.groq.com/playground) 
 
 5. Run the application:
 

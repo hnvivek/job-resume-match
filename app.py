@@ -8,11 +8,22 @@ from utils.score_calculation import calculate_match_score  # Import your scoring
 from utils.scraper import fetch_text_from_url
 from werkzeug.utils import secure_filename
 
+from utils.text_processing import process_text_for_model
+from dotenv import load_dotenv
+
 app = Flask(__name__)
 
 # Load prompts at the start of your application
 prompts = load_prompts_from_directory("./prompts")
 
+
+# Load the .env file
+load_dotenv()
+
+# Now you can access the variables from the .env file
+groq_api_key = os.getenv("GROQ_API_KEY")
+model = os.getenv("model")
+max_tokens = int(os.getenv("max_tokens"))
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -22,7 +33,11 @@ def index():
 
         if url:
             url_extract = fetch_text_from_url(url)  # Implement this function as needed
-            job_keywords = extract_keywords(url_extract, prompts["extract_keywords"])
+            print(len(url_extract))
+            job_keywords = extract_keywords(model,process_text_for_model(url_extract,
+                                                                         max_tokens=max_tokens),
+                                                                         prompts[
+                "extract_keywords"])
         else:
             job_keywords = None
 
@@ -30,7 +45,9 @@ def index():
             file_path = save_file(file)
             resume_extract = extract_text_from_file(
                 file_path)  # Use your existing function
-            resume_keywords = extract_keywords(resume_extract,
+
+            resume_keywords = extract_keywords(model,process_text_for_model(
+                resume_extract, max_tokens=max_tokens),
                                                prompts["extract_keywords"])
         else:
             resume_keywords = None

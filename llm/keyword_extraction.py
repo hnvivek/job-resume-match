@@ -2,9 +2,9 @@ from langchain_groq import ChatGroq
 from langchain_core.output_parsers import JsonOutputParser
 from data_models.keywords import KeywordsModel
 
-def extract_keywords(user_input, sys_prompt):
+def extract_keywords(model, user_input, sys_prompt):
     llm = ChatGroq(
-        model="gemma2-9b-it",
+        model=model,
         temperature=0.0,
         max_retries=2
     )
