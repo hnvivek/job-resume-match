@@ -13,11 +13,8 @@ COPY . .
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Make start.sh executable
-RUN chmod +x start.sh
-
-# Expose the port your app runs on (note: Railway will automatically bind a dynamic port)
+# Expose port 5000 (this is the fixed port we are using)
 EXPOSE 5000
 
-# Use the shell script as the entrypoint
-CMD ["./start.sh"]
+# Run the application using gunicorn on port 5000
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
