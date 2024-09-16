@@ -1,5 +1,6 @@
 import os
 from flask import Flask, request, render_template
+from transformers import Pix2StructTextModel
 
 from llm.generate_cover_letter import generate_cover
 from utils.prompt_loader import \
@@ -133,7 +134,6 @@ def handle_cover_letter_generation(job_url, job_description, resume_file, resume
 
         job_description, job_keywords, resume_content, resume_keywords = load_data(job_url, job_description, resume_file, resume_content)
 
-
         match_score, common_keywords, missing_keywords = calculate_match_score(
             job_keywords, resume_keywords)
 
@@ -150,8 +150,10 @@ def handle_cover_letter_generation(job_url, job_description, resume_file, resume
         resume_keywords_list = list(resume_keywords_set - set(common_keywords))
 
         cover_letter = generate_cover(model, job_description, resume_content,
-                                      common_keywords, prompts[
+                                      job_keywords_set, prompts[
                                           "generate_cover_prompt"])
+
+        process_text_for_model(text=cover_letter, max_tokens=400)
 
         return render_template('cover_letter.html', cover_letter=cover_letter, common_keywords=common_keywords, missing_keywords=missing_keywords, job_keywords=job_keywords_list, resume_keywords=resume_keywords_list)
     else:
