@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editable Cover Letter</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Quill.js (Text Editor) -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <!-- marked.js for Markdown to HTML conversion -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- html-docx-js for HTML to DOCX conversion -->
+    <script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+
+    <style>
+        /* Style for the editor container */
+        .editor-container {
+            height: 600px;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            background-color: #fff;
+        }
+
+        .copy-button {
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .copy-button:hover {
+            background-color: #4CAF50; /* Hover color */
+        }
+
+        .highlight-common {
+            background-color: green;
+            color: white;
+            border-radius: 9999px; /* Rounded pill */
+            padding: 0.2rem 0.6rem;
+        }
+
+        .highlight-missing {
+            background-color: red;
+            color: white;
+            border-radius: 9999px; /* Rounded pill */
+            padding: 0.2rem 0.6rem;
+        }
+
+        .highlight-unique {
+            background-color: blue;
+            color: white;
+            border-radius: 9999px; /* Rounded pill */
+            padding: 0.2rem 0.6rem;
+        }
+
+        /* Fixed header for Job Description and Resume */
+        .header-fixed {
+            position: relative;
+            top: 0;
+            background-color: white;
+            z-index: 10;
+            padding: 1rem 0;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Style for shadow effect on all components */
+        .component-box {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Ensure the container does not cover the text */
+        .scrollable-container {
+            overflow-y: auto;
+            max-height: 96vh;
+        }
+
+        body, p, h1, h2, h3, h4, h5, h6 {
+            font-weight: normal;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Ensure editor's default text isn't bold */
+        #editor * {
+            font-weight: normal !important;
+        }
+
+        #editor h1, #editor h2 {
+            font-weight: bold;}
+    </style>
+
+</head>
+<body class="flex flex-col min-h-screen bg-gray-100">
+
+<!-- Header -->
+<header class="bg-gray-800 text-white py-4">
+    <div class="container mx-auto flex justify-between items-center">
+        <button onclick="goBack()"
+                class="bg-gray-700 text-white py-2 px-4 rounded hover:bg-gray-600">
+            ← Back
+        </button>
+        <h1 class="text-3xl font-bold text-center">Editable Cover Letter</h1>
+        <!-- Empty right side to balance the header -->
+        <div class="w-16"></div>
+    </div>
+</header>
+
+<!-- Main Content Area -->
+<main class="flex-grow container mx-auto py-8">
+
+    <div class="flex items-center justify-center mb-2">
+    <!-- Legend Section -->
+    <div class="flex space-x-4">
+        <div class="flex items-center">
+            <span class="w-4 h-4 bg-green-500 rounded-full mr-2"></span>
+            <span>Matching Keywords</span>
+        </div>
+        <div class="flex items-center">
+            <span class="w-4 h-4 bg-red-500 rounded-full mr-2"></span>
+            <span>Missing Keywords</span>
+        </div>
+        <div class="flex items-center">
+            <span class="w-4 h-4 bg-blue-500 rounded-full mr-2"></span>
+            <span>Keywords</span>
+        </div>
+    </div>
+    </div>
+
+    <!-- Keywords Highlight Section -->
+    <div class="bg-white p-6 rounded-lg shadow-lg component-box">
+        <!-- Job Description Keywords: common + missing -->
+        <h4 class="text-lg font-bold mb-2 mt-6">Job Description Keywords</h4>
+        <div id="job-keywords" class="flex flex-wrap gap-2">
+            {% for keyword in common_keywords %}
+                <!-- Common Keywords in green -->
+                <span class="highlight-common">{{ keyword }}</span>
+            {% endfor %}
+            {% for keyword in missing_keywords %}
+                <!-- Missing Keywords in red -->
+                <span class="highlight-missing">{{ keyword }}</span>
+            {% endfor %}
+        </div>
+
+        <!-- Resume Keywords: common + unique resume -->
+        <h4 class="text-lg font-bold mb-2 mt-6">Resume Keywords</h4>
+        <div id="resume-keywords" class="flex flex-wrap gap-2">
+            {% for keyword in common_keywords %}
+                <!-- Common Keywords in green -->
+                <span class="highlight-common">{{ keyword }}</span>
+            {% endfor %}
+            {% for keyword in resume_keywords %}
+                {% if keyword not in common_keywords %}
+                    <!-- Unique Resume Keywords in blue -->
+                    <span class="highlight-unique">{{ keyword }}</span>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-md">
+
+        <div class="flex justify-between items-center mb-2">
+            <h2 class="text-xl font-bold">Edit Your Generated Cover Letter</h2>
+            <div class="flex space-x-4">
+
+                <!-- Download Button -->
+                <button id="download-button" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-500">
+                    Download as Word (.docx)
+                </button>
+
+            </div>
+        </div>
+
+        <!-- Quill Editor for Cover Letter -->
+        <div id="editor-container" class="editor-container">
+            <!-- The cover letter content will be rendered here -->
+        </div>
+
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-white py-4">
+    <div class="container mx-auto text-center">
+        <p>&copy; 2024 Job Analysis Tool. All rights reserved.</p>
+    </div>
+</footer>
+
+<!-- JavaScript for Quill.js, Markdown Conversion, and Copy/Regenerate Functionality -->
+<script>
+    // Go back to the previous page
+    function goBack() {
+        window.history.back();
+    }
+
+    // Initialize Quill editor
+    var quill = new Quill('#editor-container', {
+        theme: 'snow'  // Use the 'snow' theme for the toolbar
+    });
+
+    // Dynamically injected cover letter from the backend
+    var markdownCoverLetter = `{{ cover_letter | tojson | safe }}`;  // Get the cover letter content
+
+    // Verify and process markdown
+    markdownCoverLetter = markdownCoverLetter.replace(/^"|"$/g, ''); // Remove leading and trailing quotes
+
+    // Replace single line breaks with <br> for line breaks, or keep double breaks for paragraphs
+    markdownCoverLetter = markdownCoverLetter.replace(/(\r\n|\n|\r)/g, '<br>'); // Replace newlines with <br>
+
+    // Parse the markdown to HTML
+    var formattedCoverLetter = marked.parse(markdownCoverLetter);
+
+    // Load the formatted HTML into Quill
+    quill.clipboard.dangerouslyPasteHTML(formattedCoverLetter);
+
+    // Download button functionality
+    document.getElementById("download-button").addEventListener("click", function () {
+    // Get the HTML content from the Quill editor
+    {#var coverLetterHTML = quill.root.innerHTML;#}
+
+    // Dynamically injected cover letter from the backend
+    var markdownCoverLetter = `{{ cover_letter | tojson | safe }}`;  // Get the cover letter content
+
+    // Parse the markdown to HTML
+    var coverLetterHTML = marked.parse(markdownCoverLetter);
+
+    // Ensure the content isn't empty before converting
+    if (coverLetterHTML.trim() === "") {
+        alert("The content is empty. Please add content before downloading.");
+        return;
+    }
+
+    // Convert HTML to a DOCX file using htmlDocx
+    try {
+        var convertedDocx = htmlDocx.asBlob(coverLetterHTML);
+
+        // Optional: Customize the filename
+        var filename = prompt("Enter a filename for the document:", "cover_letter") || "cover_letter";
+
+        // Use FileSaver.js to save the file
+        saveAs(convertedDocx, filename + ".docx");
+
+        console.log("Document successfully generated and saved as " + filename + ".docx");
+    } catch (error) {
+        console.error("An error occurred during the conversion:", error);
+        alert("An error occurred while generating the document.");
+    }
+});
+
+</script>
+
+</body>
+</html>

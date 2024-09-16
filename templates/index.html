@@ -7,142 +7,177 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .highlight-common {
-            background-color: green;
-            color: white;
-        }
-        .highlight-missing {
-            background-color: red;
-            color: white;
-        }
-        .highlight-unique {
-            background-color: blue;
-            color: white;
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
 
-    <!-- Header -->
-    <header class="bg-gray-800 text-white py-4">
-        <div class="container mx-auto">
-            <h1 class="text-3xl font-bold text-center">Job Analysis Tool</h1>
+<!-- Header -->
+<header class="bg-gray-800 text-white py-4">
+    <div class="container mx-auto">
+        <h1 class="text-3xl font-bold text-center">Job Analysis Tool</h1>
+    </div>
+</header>
+
+<!-- Main Content Area -->
+<main class="flex-grow container mx-auto py-8">
+    <!-- Form Section -->
+    <form method="POST" enctype="multipart/form-data" class="mb-8">
+
+        <!-- Select Job Input Method -->
+        <div class="mb-4">
+            <label class="block text-lg font-medium text-gray-700">How would you like to
+                provide the job details?</label>
+            <select id="jobMethod" name="jobMethod"
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <option value="url">Job URL</option>
+                <option value="paste">Paste Job Description</option>
+            </select>
         </div>
-    </header>
 
-    <!-- Main Content Area -->
-    <main class="flex-grow container mx-auto py-8">
-        <!-- Form Section -->
-        <form method="POST" enctype="multipart/form-data" class="mb-8">
-            <div class="mb-4">
-                <label for="url" class="block text-lg font-medium text-gray-700">Job URL:</label>
-                <input type="text" id="url" name="url" placeholder="Enter Job URL" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-            </div>
+        <!-- Job URL Section -->
+        <div class="mb-4" id="jobUrlSection">
+            <label for="jobUrl" class="block text-lg font-medium text-gray-700">Job
+                URL:</label>
+            <input type="text" id="jobUrl" name="jobUrl" placeholder="Enter Job URL"
+                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+        </div>
 
-            <div class="mb-4">
-                <label for="file" class="block text-lg font-medium text-gray-700">Upload Resume:</label>
-                <input type="file" id="file" name="file" accept=".pdf,.docx" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-            </div>
+        <!-- Paste Job Description Section (Initially Hidden) -->
+        <div class="mb-4 hidden" id="pasteJobSection">
+            <label for="jobDescription" class="block text-lg font-medium text-gray-700">Job
+                Description:</label>
+            <textarea id="jobDescription" name="jobDescription"
+                      placeholder="Paste the job description here"
+                      class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm h-40"></textarea>
+        </div>
 
-            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
-                Analyze
+        <!-- Select Resume Input Method -->
+        <div class="mb-4">
+            <label class="block text-lg font-medium text-gray-700">How would you like to
+                provide your resume?</label>
+            <select id="resumeMethod" name="resumeMethod" class="mt-1 block w-full
+                px-3 py-2 border border-gray-300 rounded-md shadow-sm
+                focus:outline-none focus:ring-indigo-500 focus:border-indigo-500
+                sm:text-sm">
+                <option value="upload">Upload Resume</option>
+                <option value="paste">Paste Resume Content</option>
+            </select>
+        </div>
+
+        <!-- File Upload Section -->
+        <div class="mb-4" id="fileUploadSection">
+            <label for="file" class="block text-lg font-medium text-gray-700">Upload
+                Resume:</label>
+            <input type="file" id="file" name="file" accept=".pdf,.docx"
+                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+        </div>
+
+        <!-- Paste Resume Section (Initially Hidden) -->
+        <div class="mb-4 hidden" id="pasteResumeSection">
+            <label for="resumeContent" class="block text-lg font-medium text-gray-700">Paste
+                Resume Content:</label>
+            <textarea id="resumeContent" name="resumeContent"
+                      placeholder="Paste your resume here" class="mt-1 block w-full px-3 py-2 border
+                border-gray-300 rounded-md shadow-sm focus:outline-none
+                focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm h-40"></textarea>
+        </div>
+
+        <div class="flex space-x-4">
+            <!-- Keywords Analyzer Button -->
+            <button type="submit" name="action" value="analyze"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
+                Keywords Analyzer
             </button>
-        </form>
 
-        <!-- Results Section (if available) -->
-        {% if match_score %}
-        <div class="space-y-8">
-            <div class="bg-gray-100 p-6 rounded-lg shadow-lg">
-                <h2 class="text-xl font-bold">Analysis Results</h2>
-                <p class="mt-2">Match Score: <span class="font-semibold">{{ match_score }}%</span></p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-8">
-                <!-- Job Description Column -->
-                <div class="bg-white p-6 rounded-lg shadow-lg overflow-y-auto max-h-96">
-                    <h2 class="text-xl font-bold mb-4">Job Description</h2>
-                    <div id="job-description" class="whitespace-pre-wrap">{{ job_description | safe }}</div>
-                </div>
-
-                <!-- Resume Column -->
-                <div class="bg-white p-6 rounded-lg shadow-lg overflow-y-auto max-h-96">
-                    <h2 class="text-xl font-bold mb-4">Resume</h2>
-                    <div id="resume-text" class="whitespace-pre-wrap">{{ resume_text | safe }}</div>
-                </div>
-            </div>
-
-            <!-- Keywords Highlight Section -->
-            <div class="bg-gray-100 p-6 rounded-lg shadow-lg">
-                <h4 class="text-lg font-bold mb-2">Common Keywords</h4>
-                <div id="common-keywords" class="flex flex-wrap gap-2">
-                    {% for keyword in common_keywords %}
-                        <span class="highlight-common px-2 py-1 rounded">{{ keyword }}</span>
-                    {% endfor %}
-                </div>
-
-                <h4 class="text-lg font-bold mb-2 mt-6">Missing Keywords</h4>
-                <div id="missing-keywords" class="flex flex-wrap gap-2">
-                    {% for keyword in missing_keywords %}
-                        <span class="highlight-missing px-2 py-1 rounded">{{ keyword }}</span>
-                    {% endfor %}
-                </div>
-
-                <h4 class="text-lg font-bold mb-2 mt-6">Job Description Keywords</h4>
-                <div id="job-keywords" class="flex flex-wrap gap-2">
-                    {% for keyword in job_keywords %}
-                        <span class="highlight-unique px-2 py-1 rounded">{{ keyword }}</span>
-                    {% endfor %}
-                </div>
-
-                <h4 class="text-lg font-bold mb-2 mt-6">Resume Keywords</h4>
-                <div id="resume-keywords" class="flex flex-wrap gap-2">
-                    {% for keyword in resume_keywords %}
-                        <span class="highlight-unique px-2 py-1 rounded">{{ keyword }}</span>
-                    {% endfor %}
-                </div>
-            </div>
+            <!-- Generate Cover Letter Button -->
+            <button type="submit" name="action" value="generate_cover_letter"
+                    class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Generate Cover Letter
+            </button>
         </div>
-        {% endif %}
-    </main>
+    </form>
+</main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-4">
-        <div class="container mx-auto text-center">
-            <p>&copy; 2024 Job Analysis Tool. All rights reserved.</p>
-        </div>
-    </footer>
+<!-- Footer -->
+<footer class="bg-gray-800 text-white py-4">
+    <div class="container mx-auto text-center">
+        <p>&copy; 2024 Job Analysis Tool. All rights reserved.</p>
+    </div>
+</footer>
 
-    <!-- JavaScript for highlighting keywords dynamically in the text -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const jobKeywords = {{ job_keywords | tojson }};
-            const resumeKeywords = {{ resume_keywords | tojson }};
-            const commonKeywords = {{ common_keywords | tojson }};
-            const missingKeywords = {{ missing_keywords | tojson }};
+<!-- JavaScript to Show/Hide Inputs Based on Selections -->
+<script>
+    // Function to update visibility of job input fields based on selection
+    function updateJobInputVisibility() {
+        const selectedMethod = document.getElementById('jobMethod').value;
+        const jobUrlSection = document.getElementById('jobUrlSection');
+        const pasteJobSection = document.getElementById('pasteJobSection');
 
-            // Function to highlight keywords in the given text
-            function highlightText(containerId, keywords, highlightClass) {
-                const container = document.getElementById(containerId);
-                if (!container) return;
+        if (selectedMethod === 'url') {
+            jobUrlSection.classList.remove('hidden');
+            pasteJobSection.classList.add('hidden');
+        } else if (selectedMethod === 'paste') {
+            jobUrlSection.classList.add('hidden');
+            pasteJobSection.classList.remove('hidden');
+        }
+    }
 
-                let content = container.innerHTML;
+    // Function to update visibility of resume input fields based on selection
+    function updateResumeInputVisibility() {
+        const selectedMethod = document.getElementById('resumeMethod').value;
+        const fileUploadSection = document.getElementById('fileUploadSection');
+        const pasteResumeSection = document.getElementById('pasteResumeSection');
 
-                keywords.forEach(keyword => {
-                    const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-                    content = content.replace(regex, `<span class="${highlightClass}">${keyword}</span>`);
-                });
+        if (selectedMethod === 'upload') {
+            fileUploadSection.classList.remove('hidden');
+            pasteResumeSection.classList.add('hidden');
+        } else if (selectedMethod === 'paste') {
+            fileUploadSection.classList.add('hidden');
+            pasteResumeSection.classList.remove('hidden');
+        }
+    }
 
-                container.innerHTML = content;
-            }
+    // Show/Hide Job Input Fields Based on Selection
+    document.getElementById('jobMethod').addEventListener('change', function () {
+        localStorage.setItem('jobMethod', this.value); // Save selected method
+        updateJobInputVisibility();
+    });
 
-            // Highlight keywords in job description and resume
-            highlightText('job-description', jobKeywords, 'highlight-unique');
-            highlightText('resume-text', resumeKeywords, 'highlight-unique');
-            highlightText('job-description', commonKeywords, 'highlight-common');
-            highlightText('resume-text', commonKeywords, 'highlight-common');
-            highlightText('job-description', missingKeywords, 'highlight-missing');
-        });
-    </script>
+    // Show/Hide Resume Input Fields Based on Selection
+    document.getElementById('resumeMethod').addEventListener('change', function () {
+        localStorage.setItem('resumeMethod', this.value); // Save selected resume method
+        updateResumeInputVisibility();
+    });
 
+    // Save job description to local storage
+    const jobDescriptionTextarea = document.getElementById('jobDescription');
+    jobDescriptionTextarea.addEventListener('input', function () {
+        localStorage.setItem('jobDescription', jobDescriptionTextarea.value);
+    });
+
+    // Load data from local storage on page load
+    window.addEventListener('load', function () {
+        const savedJobDescription = localStorage.getItem('jobDescription');
+        if (savedJobDescription) {
+            jobDescriptionTextarea.value = savedJobDescription;
+        }
+
+        const savedJobMethod = localStorage.getItem('jobMethod');
+        if (savedJobMethod) {
+            document.getElementById('jobMethod').value = savedJobMethod;
+            updateJobInputVisibility(); // Update visibility based on saved method
+        }
+
+        const savedResumeMethod = localStorage.getItem('resumeMethod');
+        if (savedResumeMethod) {
+            document.getElementById('resumeMethod').value = savedResumeMethod;
+            updateResumeInputVisibility(); // Update visibility based on saved resume method
+        }
+    });
+
+</script>
 </body>
 </html>

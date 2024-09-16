@@ -59,7 +59,7 @@
 <body class="flex flex-col min-h-screen">
 
    <!-- Header -->
-    <header class="bg-gray-800 text-white py-4 flex justify-between items-center">
+    <header class="bg-gray-800 text-white py-2 flex justify-between items-center">
         <div class="container mx-auto flex justify-between items-center">
             <!-- Back Button on the Left -->
             <button onclick="goBack()" class="bg-gray-700 text-white py-2 px-4 rounded hover:bg-gray-600">
@@ -73,9 +73,9 @@
         </div>
     </header>
 
-    <main id="report-content"  class="flex-grow container mx-auto py-8">
+    <main id="report-content"  class="flex-grow container mx-auto py-2">
 
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center justify-between mb-2">
              <!-- Logo on the left side -->
             <div class="flex items-center">
                 <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo"
@@ -104,7 +104,7 @@
         {% if match_score %}
         <div class="space-y-8">
             <h2 class="text-xl font-bold">Analysis Results</h2>
-            <div class="p-6 rounded-lg shadow-lg component-box">
+            <div class="p-2 rounded-lg shadow-lg component-box">
 
                 <!-- Grid with Gauge and Missing/Matching Keywords -->
                 <div class="grid grid-cols-2 gap-8 items-start">
@@ -114,7 +114,7 @@
                     </div>
 
                     <!-- Missing and Matching Keywords (Side by Side) -->
-                    <div class="bg-white p-4 rounded-lg component-box">
+                    <div class="bg-white p-2 rounded-lg component-box">
                         <!-- Matching Keywords -->
                         <h4 class="text-lg font-bold mb-2">Matching Keywords</h4>
                         <ul id="matching-keywords-list" class="flex flex-wrap gap-2">
@@ -124,7 +124,7 @@
                         </ul>
 
                         <!-- Missing Keywords -->
-                        <h4 class="text-lg font-bold mb-2 mt-4">Missing Keywords</h4>
+                        <h4 class="text-lg font-bold mb-2 mt-2">Missing Keywords</h4>
                         <ul id="missing-keywords-list" class="flex flex-wrap gap-2">
                             {% for keyword in missing_keywords %}
                                 <li class="highlight-missing">{{ keyword }}</li>
@@ -146,20 +146,20 @@
 
             <div class="grid grid-cols-2 gap-8 scrollable-container">
                 <!-- Job Description Column -->
-                <div class="bg-white p-6 rounded-lg shadow-lg component-box">
+                <div class="bg-white p-2 rounded-lg shadow-lg component-box">
                     <div id="job-description" class="whitespace-pre-wrap">{{ job_description | safe }}</div>
                 </div>
 
                 <!-- Resume Column -->
-                <div class="bg-white p-6 rounded-lg shadow-lg component-box">
-                    <div id="resume-text" class="whitespace-pre-wrap">{{ resume_text | safe }}</div>
+                <div class="bg-white p-2 rounded-lg shadow-lg component-box">
+                    <div id="resume-text" class="whitespace-pre-wrap">{{ resume_content | safe }}</div>
                 </div>
             </div>
 
             <!-- Keywords Highlight Section -->
-            <div class="p-6 rounded-lg shadow-lg component-box">
+            <div class="p-2 rounded-lg shadow-lg component-box">
                 <!-- Job Description Keywords: common + missing -->
-                <h4 class="text-lg font-bold mb-2 mt-6">Job Description Keywords</h4>
+                <h4 class="text-lg font-bold mb-2 mt-2">Job Description Keywords</h4>
                 <div id="job-keywords" class="flex flex-wrap gap-2">
                     {% for keyword in common_keywords %}
                         <!-- Common Keywords in green -->
@@ -172,7 +172,7 @@
                 </div>
 
                 <!-- Resume Keywords: common + unique resume -->
-                <h4 class="text-lg font-bold mb-2 mt-6">Resume Keywords</h4>
+                <h4 class="text-lg font-bold mb-2 mt-2">Resume Keywords</h4>
                 <div id="resume-keywords" class="flex flex-wrap gap-2">
                     {% for keyword in common_keywords %}
                         <!-- Common Keywords in green -->
@@ -193,7 +193,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-4">
+    <footer class="bg-gray-800 text-white py-2">
         <div class="container mx-auto text-center">
             <p>&copy; 2024 Job Analysis Tool. All rights reserved.</p>
         </div>
