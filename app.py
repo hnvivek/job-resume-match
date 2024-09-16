@@ -1,7 +1,6 @@
 import os
+import hashlib
 from flask import Flask, request, render_template
-from transformers import Pix2StructTextModel
-
 from llm.generate_cover_letter import generate_cover
 from utils.prompt_loader import \
     load_prompts_from_directory  # Adjust the import as necessary
@@ -58,6 +57,31 @@ def initial_loaders():
 # Call the initial_loaders function immediately when the script is loaded
 initial_loaders()
 
+# Cache to store LLM results
+cache = {
+    'job_description': {},
+    'resume_content': {}
+}
+
+def hash_content(content):
+    """Hashes the content to create a unique key for caching."""
+    return hashlib.sha256(content.encode('utf-8')).hexdigest()
+
+def cache_keywords(cache_key, content, keywords):
+    """
+    Pushes generated keywords to the cache.
+    """
+    hashed_content = hash_content(content)
+    cache[cache_key][hashed_content] = keywords
+
+def get_cached_keywords(cache_key, content):
+    """
+    Checks if keywords for the given content are in the cache. If found, return them.
+    Otherwise, return None.
+    """
+    hashed_content = hash_content(content)
+    return cache[cache_key].get(hashed_content, None)
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -87,27 +111,59 @@ def index():
                            common_keywords=[], missing_keywords=[])
 
 
+# Cache to store LLM results
+cache = {
+    'job_description': {},
+    'resume_content': {}
+}
+
+def hash_content(content):
+    """Hashes the content to create a unique key for caching."""
+    return hashlib.sha256(content.encode('utf-8')).hexdigest()
+
+def cache_keywords(cache_key, content, keywords):
+    """
+    Pushes generated keywords to the cache.
+    """
+    hashed_content = hash_content(content)
+    cache[cache_key][hashed_content] = keywords
+
+def get_cached_keywords(cache_key, content):
+    """
+    Checks if keywords for the given content are in the cache. If found, return them.
+    Otherwise, return None.
+    """
+    hashed_content = hash_content(content)
+    return cache[cache_key].get(hashed_content, None)
+
 def load_data(job_url, job_description, resume_file, resume_content):
+    global cache
+
     # Handle job description
     if job_url:
         job_description = fetch_text_from_url(job_url)
+
+    # Extract job keywords and check cache
+    job_keywords = get_cached_keywords('job_description', job_description)
+    if not job_keywords and job_description:
+        # If not cached, process and cache it
         job_keywords = extract_keywords(model, process_text_for_model(text=job_description, max_tokens=max_tokens), prompts["extract_keywords"])
-    elif job_description:
-        job_keywords = extract_keywords(model, process_text_for_model(text=job_description, max_tokens=max_tokens), prompts["extract_keywords"])
-    else:
-        job_keywords = None
+        cache_keywords('job_description', job_description, job_keywords)
 
     # Handle resume
     if resume_file:
         file_path = save_file(resume_file)
         resume_content = extract_text_from_file(file_path)
+
+    # Extract resume keywords and check cache
+    resume_keywords = get_cached_keywords('resume_content', resume_content)
+    if not resume_keywords and resume_content:
+        # If not cached, process and cache it
         resume_keywords = extract_keywords(model, process_text_for_model(text=resume_content, max_tokens=max_tokens), prompts["extract_keywords"])
-    elif resume_content:
-        resume_keywords = extract_keywords(model, process_text_for_model(text=resume_content, max_tokens=max_tokens), prompts["extract_keywords"])
-    else:
-        resume_keywords = None
+        cache_keywords('resume_content', resume_content, resume_keywords)
 
     return job_description, job_keywords, resume_content, resume_keywords
+
 
 
 

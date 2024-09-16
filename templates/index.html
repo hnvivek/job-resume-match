@@ -10,6 +10,38 @@
         .hidden {
             display: none;
         }
+
+        /* Spinner Overlay */
+        .spinner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+        }
+
+        .spinner {
+            border: 8px solid rgba(0, 0, 0, 0.1);
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
@@ -24,7 +56,7 @@
 <!-- Main Content Area -->
 <main class="flex-grow container mx-auto py-8">
     <!-- Form Section -->
-    <form method="POST" enctype="multipart/form-data" class="mb-8">
+    <form method="POST" enctype="multipart/form-data" class="mb-8" id="jobForm">
 
         <!-- Select Job Input Method -->
         <div class="mb-4">
@@ -100,6 +132,11 @@
         </div>
     </form>
 </main>
+
+<!-- Spinner Overlay -->
+<div id="spinner" class="spinner-overlay hidden">
+    <div class="spinner"></div>
+</div>
 
 <!-- Footer -->
 <footer class="bg-gray-800 text-white py-4">
@@ -178,6 +215,11 @@
         }
     });
 
+    // Show spinner on form submit
+    document.getElementById('jobForm').addEventListener('submit', function (event) {
+        document.getElementById('spinner').classList.remove('hidden');
+    });
 </script>
+
 </body>
 </html>
