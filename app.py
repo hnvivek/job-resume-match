@@ -150,7 +150,7 @@ def handle_cover_letter_generation(job_url, job_description, resume_file, resume
         resume_keywords_list = list(resume_keywords_set - set(common_keywords))
 
         cover_letter = generate_cover(model, job_description, resume_content,
-                                      job_keywords_set, prompts[
+                                      common_keywords, prompts[
                                           "generate_cover_prompt"])
 
         return render_template('cover_letter.html', cover_letter=cover_letter, common_keywords=common_keywords, missing_keywords=missing_keywords, job_keywords=job_keywords_list, resume_keywords=resume_keywords_list)
