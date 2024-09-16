@@ -2,6 +2,7 @@ import os
 import hashlib
 from flask import Flask, request, render_template
 from llm.generate_cover_letter import generate_cover
+from llm.markdown_proofreader import proofreader
 from utils.prompt_loader import \
     load_prompts_from_directory  # Adjust the import as necessary
 from loaders.document_loaders import extract_text_from_file  # Import your document loader
@@ -9,7 +10,7 @@ from llm.keyword_extraction import extract_keywords  # Import your LLM extractor
 from utils.score_calculation import calculate_match_score  # Import your scoring function
 from utils.scraper import fetch_text_from_url
 from werkzeug.utils import secure_filename
-from utils.text_processing import process_text_for_model
+from utils.text_processing import process_text_for_model, truncate_text
 from dotenv import load_dotenv
 
 app = Flask(__name__)
@@ -63,9 +64,11 @@ cache = {
     'resume_content': {}
 }
 
+
 def hash_content(content):
     """Hashes the content to create a unique key for caching."""
     return hashlib.sha256(content.encode('utf-8')).hexdigest()
+
 
 def cache_keywords(cache_key, content, keywords):
     """
@@ -73,6 +76,7 @@ def cache_keywords(cache_key, content, keywords):
     """
     hashed_content = hash_content(content)
     cache[cache_key][hashed_content] = keywords
+
 
 def get_cached_keywords(cache_key, content):
     """
@@ -117,9 +121,11 @@ cache = {
     'resume_content': {}
 }
 
+
 def hash_content(content):
     """Hashes the content to create a unique key for caching."""
     return hashlib.sha256(content.encode('utf-8')).hexdigest()
+
 
 def cache_keywords(cache_key, content, keywords):
     """
@@ -127,6 +133,7 @@ def cache_keywords(cache_key, content, keywords):
     """
     hashed_content = hash_content(content)
     cache[cache_key][hashed_content] = keywords
+
 
 def get_cached_keywords(cache_key, content):
     """
@@ -136,59 +143,80 @@ def get_cached_keywords(cache_key, content):
     hashed_content = hash_content(content)
     return cache[cache_key].get(hashed_content, None)
 
+
 def load_data(job_url, job_description, resume_file, resume_content):
     global cache
 
     # Handle job description
     if job_url:
-        job_description = fetch_text_from_url(job_url)
+        read_description = fetch_text_from_url(job_url)
+        job_description = truncate_text(text=read_description,
+                                        max_tokens=max_tokens)
 
     # Extract job keywords and check cache
     job_keywords = get_cached_keywords('job_description', job_description)
     if not job_keywords and job_description:
         # If not cached, process and cache it
-        job_keywords = extract_keywords(model, process_text_for_model(text=job_description, max_tokens=max_tokens), prompts["extract_keywords"])
+        job_keywords = extract_keywords(model,
+                                        process_text_for_model(text=job_description,
+                                                               max_tokens=max_tokens),
+                                        prompts["extract_keywords"])
         cache_keywords('job_description', job_description, job_keywords)
 
     # Handle resume
     if resume_file:
         file_path = save_file(resume_file)
-        resume_content = extract_text_from_file(file_path)
+        read_resume = extract_text_from_file(file_path)
+        resume_content = truncate_text(text=read_resume, max_tokens=max_tokens)
 
     # Extract resume keywords and check cache
     resume_keywords = get_cached_keywords('resume_content', resume_content)
     if not resume_keywords and resume_content:
         # If not cached, process and cache it
-        resume_keywords = extract_keywords(model, process_text_for_model(text=resume_content, max_tokens=max_tokens), prompts["extract_keywords"])
+        resume_keywords = extract_keywords(model,
+                                           process_text_for_model(text=resume_content,
+                                                                  max_tokens=max_tokens),
+                                           prompts["extract_keywords"])
         cache_keywords('resume_content', resume_content, resume_keywords)
 
     return job_description, job_keywords, resume_content, resume_keywords
 
 
-
-
 def handle_keywords_analyzer(job_url, job_description, resume_file, resume_content):
-    job_description, job_keywords, resume_content, resume_keywords = load_data(job_url, job_description, resume_file, resume_content)
+    job_description, job_keywords, resume_content, resume_keywords = load_data(job_url,
+                                                                               job_description,
+                                                                               resume_file,
+                                                                               resume_content)
 
-    match_score, common_keywords, missing_keywords = calculate_match_score(job_keywords, resume_keywords)
+    match_score, common_keywords, missing_keywords = calculate_match_score(job_keywords,
+                                                                           resume_keywords)
 
     common_keywords = list(common_keywords) if common_keywords else []
     missing_keywords = list(missing_keywords) if missing_keywords else []
 
-    job_keywords_set = set(job_keywords['hard skills']).union(set(job_keywords['soft skills']))
-    job_keywords_list = list(job_keywords_set - set(common_keywords) - set(missing_keywords))
+    job_keywords_set = set(job_keywords['hard skills']).union(
+        set(job_keywords['soft skills']))
+    job_keywords_list = list(
+        job_keywords_set - set(common_keywords) - set(missing_keywords))
 
-    resume_keywords_set = set(resume_keywords['hard skills']).union(set(resume_keywords['soft skills']))
+    resume_keywords_set = set(resume_keywords['hard skills']).union(
+        set(resume_keywords['soft skills']))
     resume_keywords_list = list(resume_keywords_set - set(common_keywords))
 
-    return render_template('results.html', match_score=match_score, common_keywords=common_keywords, missing_keywords=missing_keywords,
-                           job_description=job_description or "", resume_content=resume_content or "", job_keywords=job_keywords_list, resume_keywords=resume_keywords_list)
+    return render_template('results.html', match_score=match_score,
+                           common_keywords=common_keywords,
+                           missing_keywords=missing_keywords,
+                           job_description=job_description or "",
+                           resume_content=resume_content or "",
+                           job_keywords=job_keywords_list,
+                           resume_keywords=resume_keywords_list)
 
 
 def handle_cover_letter_generation(job_url, job_description, resume_file, resume_content):
     if (job_url or job_description) and (resume_file or resume_content):
 
-        job_description, job_keywords, resume_content, resume_keywords = load_data(job_url, job_description, resume_file, resume_content)
+        job_description, job_keywords, resume_content, resume_keywords = load_data(
+            job_url, job_description, resume_file, resume_content)
 
         match_score, common_keywords, missing_keywords = calculate_match_score(
             job_keywords, resume_keywords)
@@ -209,13 +237,17 @@ def handle_cover_letter_generation(job_url, job_description, resume_file, resume
                                       job_keywords_set, prompts[
                                           "generate_cover_prompt"])
 
-        process_text_for_model(text=cover_letter, max_tokens=400)
+        proofread_cover_letter = proofreader(model, cover_letter, job_keywords_list,
+                                             prompts[
+                                                 "markdown_proofreader_prompt"])
 
-        return render_template('cover_letter.html', cover_letter=cover_letter, common_keywords=common_keywords, missing_keywords=missing_keywords, job_keywords=job_keywords_list, resume_keywords=resume_keywords_list)
+        return render_template('cover_letter.html', cover_letter=proofread_cover_letter,
+                               common_keywords=common_keywords,
+                               missing_keywords=missing_keywords,
+                               job_keywords=job_keywords_list,
+                               resume_keywords=resume_keywords_list)
     else:
         return "Error: Both job description and resume are required to generate a cover letter."
-
-
 
 
 def save_file(file):

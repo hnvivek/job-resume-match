@@ -14,17 +14,7 @@ def generate_cover(model, job_description, resume_content, skills_keywords,
 
     messages = [
         ("system", f"{sys_prompt}"),
-        ("human",
-        f"""The Current date is {today} Please generate a unique cover letter 
-        with in 400 words tailored for the Job description : [{job_description}] using 
-        my resume: [{resume_content}].
-        I'm very interested in this position and want to grab the hiring manager's attention.
-        Include my name, relevant skills, work history, and past employers and projects from my resume.
-        I've also provided some important skills below extracted from 
-        the job description to incorporate in cover letter and bold them: Skills 
-        [{skills_keywords}] 
-        Write the cover letter in a personable, authentic style and return the response in Markdown format.
-        The output should be polished and ready to drop into a WYSIWYG editor."""
+        ("human", f"""The Current date is {today}, Using the provided job description: [{job_description}], resume content: [{resume_content}] and keywords: [{skills_keywords}], generate a personalized, unique cover letter for the candidate that will stand out to the employer. Bold key skills. Output in markdown format. 400 words max."""
          ),
     ]
 
