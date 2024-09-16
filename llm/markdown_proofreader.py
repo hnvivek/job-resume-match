@@ -1,8 +1,5 @@
 from langchain_groq import ChatGroq
 
-from playground import skills_keywords
-
-
 def proofreader(model, user_input, skills_keywords, sys_prompt):
     llm = ChatGroq(
         model=model,
