@@ -88,7 +88,8 @@
         }
 
         #editor h1, #editor h2 {
-            font-weight: bold;}
+            font-weight: bold;
+        }
     </style>
 
 </head>
@@ -111,21 +112,21 @@
 <main class="flex-grow container mx-auto py-8">
 
     <div class="flex items-center justify-center mb-2">
-    <!-- Legend Section -->
-    <div class="flex space-x-4">
-        <div class="flex items-center">
-            <span class="w-4 h-4 bg-green-500 rounded-full mr-2"></span>
-            <span>Matching Keywords</span>
+        <!-- Legend Section -->
+        <div class="flex space-x-4">
+            <div class="flex items-center">
+                <span class="w-4 h-4 bg-green-500 rounded-full mr-2"></span>
+                <span>Matching Keywords</span>
+            </div>
+            <div class="flex items-center">
+                <span class="w-4 h-4 bg-red-500 rounded-full mr-2"></span>
+                <span>Missing Keywords</span>
+            </div>
+            <div class="flex items-center">
+                <span class="w-4 h-4 bg-blue-500 rounded-full mr-2"></span>
+                <span>Keywords</span>
+            </div>
         </div>
-        <div class="flex items-center">
-            <span class="w-4 h-4 bg-red-500 rounded-full mr-2"></span>
-            <span>Missing Keywords</span>
-        </div>
-        <div class="flex items-center">
-            <span class="w-4 h-4 bg-blue-500 rounded-full mr-2"></span>
-            <span>Keywords</span>
-        </div>
-    </div>
     </div>
 
     <!-- Keywords Highlight Section -->
@@ -166,7 +167,8 @@
             <div class="flex space-x-4">
 
                 <!-- Download Button -->
-                <button id="download-button" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-500">
+                <button id="download-button"
+                        class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-500">
                     Download as Word (.docx)
                 </button>
 
@@ -204,7 +206,7 @@
     var markdownCoverLetter = `{{ cover_letter | tojson | safe }}`;  // Get the cover letter content
 
     // Verify and process markdown
-    markdownCoverLetter = markdownCoverLetter.replace(/^"|"$/g, ''); // Remove leading and trailing quotes
+    {#markdownCoverLetter = markdownCoverLetter.replace(/^"|"$/g, ''); // Remove leading and trailing quotes#}
 
     // Replace single line breaks with <br> for line breaks, or keep double breaks for paragraphs
     markdownCoverLetter = markdownCoverLetter.replace(/(\r\n|\n|\r)/g, '<br>'); // Replace newlines with <br>
@@ -217,37 +219,35 @@
 
     // Download button functionality
     document.getElementById("download-button").addEventListener("click", function () {
-    // Get the HTML content from the Quill editor
-    {#var coverLetterHTML = quill.root.innerHTML;#}
+        // Get the HTML content from the Quill editor
+        var coverLetterHTML = quill.root.innerHTML;
 
-    // Dynamically injected cover letter from the backend
-    var markdownCoverLetter = `{{ cover_letter | tojson | safe }}`;  // Get the cover letter content
 
-    // Parse the markdown to HTML
-    var coverLetterHTML = marked.parse(markdownCoverLetter);
+        markdownCoverLetter = markdownCoverLetter.replace(/<br>/g, '\n');
 
-    // Ensure the content isn't empty before converting
-    if (coverLetterHTML.trim() === "") {
-        alert("The content is empty. Please add content before downloading.");
-        return;
-    }
 
-    // Convert HTML to a DOCX file using htmlDocx
-    try {
-        var convertedDocx = htmlDocx.asBlob(coverLetterHTML);
+        // Ensure the content isn't empty before converting
+        if (coverLetterHTML.trim() === "") {
+            alert("The content is empty. Please add content before downloading.");
+            return;
+        }
 
-        // Optional: Customize the filename
-        var filename = prompt("Enter a filename for the document:", "cover_letter") || "cover_letter";
+        // Convert HTML to a DOCX file using htmlDocx
+        try {
+            var convertedDocx = htmlDocx.asBlob(coverLetterHTML);
 
-        // Use FileSaver.js to save the file
-        saveAs(convertedDocx, filename + ".docx");
+            // Optional: Customize the filename
+            var filename = prompt("Enter a filename for the document:", "cover_letter") || "cover_letter";
 
-        console.log("Document successfully generated and saved as " + filename + ".docx");
-    } catch (error) {
-        console.error("An error occurred during the conversion:", error);
-        alert("An error occurred while generating the document.");
-    }
-});
+            // Use FileSaver.js to save the file
+            saveAs(convertedDocx, filename + ".docx");
+
+            console.log("Document successfully generated and saved as " + filename + ".docx");
+        } catch (error) {
+            console.error("An error occurred during the conversion:", error);
+            alert("An error occurred while generating the document.");
+        }
+    });
 
 </script>
 
