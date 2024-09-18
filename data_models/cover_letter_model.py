@@ -1,6 +1,3 @@
-
-# File: data_models/cover_letter_model.py
-
 from langchain_core.pydantic_v1 import BaseModel, Field
 
 class CoverLetterModel(BaseModel):

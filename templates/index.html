@@ -6,7 +6,8 @@
     <title>Job Analysis Tool</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         .hidden {
             display: none;
@@ -76,7 +77,8 @@
                 URL:</label>
             <input type="text" id="jobUrl" name="jobUrl" placeholder="Enter Job URL"
                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-             <span id="jobUrlError" class="hidden text-red-600 text-sm"></span> <!-- Error Message for Job URL -->
+            <span id="jobUrlError" class="hidden text-red-600 text-sm"></span>
+            <!-- Error Message for Job URL -->
 
         </div>
 
@@ -87,7 +89,8 @@
             <textarea id="jobDescription" name="jobDescription"
                       placeholder="Paste the job description here"
                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm h-40"></textarea>
-            <span id="jobDescriptionError" class="hidden text-red-600 text-sm"></span> <!-- Error Message for Job Description -->
+            <span id="jobDescriptionError" class="hidden text-red-600 text-sm"></span>
+            <!-- Error Message for Job Description -->
 
         </div>
 
@@ -110,7 +113,8 @@
                 Resume:</label>
             <input type="file" id="file" name="file" accept=".pdf,.docx"
                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-            <span id="fileUploadError" class="hidden text-red-600 text-sm"></span> <!-- Error Message for File Upload -->
+            <span id="fileUploadError" class="hidden text-red-600 text-sm"></span>
+            <!-- Error Message for File Upload -->
         </div>
 
         <!-- Paste Resume Section (Initially Hidden) -->
@@ -121,7 +125,8 @@
                       placeholder="Paste your resume here" class="mt-1 block w-full px-3 py-2 border
                 border-gray-300 rounded-md shadow-sm focus:outline-none
                 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm h-40"></textarea>
-            <span id="resumeContentError" class="hidden text-red-600 text-sm"></span> <!-- Error Message for Resume Content -->
+            <span id="resumeContentError" class="hidden text-red-600 text-sm"></span>
+            <!-- Error Message for Resume Content -->
         </div>
 
         <div class="flex space-x-4">
@@ -136,6 +141,11 @@
                     class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                 Generate Cover Letter
             </button>
+
+            <button type="submit" name="action" value="optimize_resume"
+                    class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                Optimize Resume
+            </button>
         </div>
     </form>
 </main>
@@ -147,19 +157,18 @@
 
 <!-- Footer -->
 
-    {% include 'footer.html' %}
-
+{% include 'footer.html' %}
 
 
 <!-- JavaScript to Show/Hide Inputs Based on Selections -->
 <script>
     // Load Footer from template/footer.html
-        fetch('template/footer.html')
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('footer-placeholder').innerHTML = data;
-            })
-            .catch(error => console.log('Error loading footer:', error));
+    fetch('template/footer.html')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('footer-placeholder').innerHTML = data;
+        })
+        .catch(error => console.log('Error loading footer:', error));
 
     // Function to update visibility of job input fields based on selection
     function updateJobInputVisibility() {
@@ -216,7 +225,7 @@
             jobDescriptionTextarea.value = savedJobDescription;
         }
 
-        const savedJobMethod = localStorage.getItem('jobMethod')  || 'paste';
+        const savedJobMethod = localStorage.getItem('jobMethod') || 'paste';
         if (savedJobMethod) {
             document.getElementById('jobMethod').value = savedJobMethod;
             updateJobInputVisibility(); // Update visibility based on saved method
@@ -229,7 +238,7 @@
         }
     });
 
-        // Function to validate if either job description or resume is provided
+    // Function to validate if either job description or resume is provided
     function validateForm() {
         const jobMethod = document.getElementById('jobMethod').value;
         const resumeMethod = document.getElementById('resumeMethod').value;

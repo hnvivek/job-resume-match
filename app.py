@@ -2,6 +2,7 @@ import os
 import hashlib
 from flask import Flask, request, render_template
 from llm.generate_cover_letter import generate_cover
+from llm.resume_enhancement_generator import generate_resume_enhancements
 from utils.prompt_loader import \
     load_prompts_from_directory  # Adjust the import as necessary
 from loaders.document_loaders import extract_text_from_file  # Import your document loader
@@ -109,38 +110,13 @@ def index():
         elif action == 'generate_cover_letter':
             return handle_cover_letter_generation(job_url, job_description, resume_file,
                                                   resume_content)
+        elif action == 'optimize_resume':
+            return handle_resume_enhancement_generation(job_url, job_description,
+                                                        resume_file,
+                                                        resume_content)
 
     return render_template('index.html', job_keywords=[], resume_keywords=[],
                            common_keywords=[], missing_keywords=[])
-
-
-# Cache to store LLM results
-cache = {
-    'job_description': {},
-    'resume_content': {}
-}
-
-
-def hash_content(content):
-    """Hashes the content to create a unique key for caching."""
-    return hashlib.sha256(content.encode('utf-8')).hexdigest()
-
-
-def cache_keywords(cache_key, content, keywords):
-    """
-    Pushes generated keywords to the cache.
-    """
-    hashed_content = hash_content(content)
-    cache[cache_key][hashed_content] = keywords
-
-
-def get_cached_keywords(cache_key, content):
-    """
-    Checks if keywords for the given content are in the cache. If found, return them.
-    Otherwise, return None.
-    """
-    hashed_content = hash_content(content)
-    return cache[cache_key].get(hashed_content, None)
 
 
 def load_data(job_url, job_description, resume_file, resume_content):
@@ -187,9 +163,10 @@ def handle_keywords_analyzer(job_url, job_description, resume_file, resume_conte
                                                                                resume_file,
                                                                                resume_content)
 
-    match_score, common_keywords, missing_keywords = calculate_match_score(job_keywords,
-                                                                           resume_keywords,
-                                                                           resume_content)
+    match_score, common_keywords, missing_keywords, hard_skills, soft_skills, missing_hard_skills, missing_soft_skills = calculate_match_score(
+        job_keywords,
+        resume_keywords,
+        resume_content)
 
     common_keywords = list(common_keywords) if common_keywords else []
     missing_keywords = list(missing_keywords) if missing_keywords else []
@@ -217,7 +194,7 @@ def handle_cover_letter_generation(job_url, job_description, resume_file, resume
         job_description, job_keywords, resume_content, resume_keywords = load_data(
             job_url, job_description, resume_file, resume_content)
 
-        match_score, common_keywords, missing_keywords = calculate_match_score(
+        match_score, common_keywords, missing_keywords, hard_skills, soft_skills, missing_hard_skills, missing_soft_skills = calculate_match_score(
             job_keywords, resume_keywords, resume_content)
 
         common_keywords = list(common_keywords) if common_keywords else []
@@ -232,16 +209,78 @@ def handle_cover_letter_generation(job_url, job_description, resume_file, resume
             set(resume_keywords['soft skills']))
         resume_keywords_list = list(resume_keywords_set - set(common_keywords))
 
-        cover_letter = generate_cover(model, job_description, resume_content,
+        try:
+            cover_letter = generate_cover(model, job_description, resume_content,
                                       job_keywords_set, prompts[
                                           "generate_cover_prompt"])
 
+            return render_template('cover_letter.html', cover_letter=cover_letter,
+                                   common_keywords=common_keywords,
+                                   missing_keywords=missing_keywords,
+                                   job_keywords=job_keywords_list,
+                                   resume_keywords=resume_keywords_list)
+        except Exception as e:
+            print(f"Failed to generate resume enhancements: {str(e)}")
 
-        return render_template('cover_letter.html', cover_letter=cover_letter,
+        return render_template('cover_letter.html', cover_letter=None,
                                common_keywords=common_keywords,
                                missing_keywords=missing_keywords,
                                job_keywords=job_keywords_list,
                                resume_keywords=resume_keywords_list)
+    else:
+        return "Error: Both job description and resume are required to generate a cover letter."
+
+
+def handle_resume_enhancement_generation(job_url, job_description, resume_file,
+                                         resume_content):
+    if (job_url or job_description) and (resume_file or resume_content):
+        job_description, job_keywords, resume_content, resume_keywords = load_data(
+            job_url, job_description, resume_file, resume_content)
+
+        match_score, common_keywords, missing_keywords, job_hard_skills, job_soft_skills, missing_hard_skills, missing_soft_skills = calculate_match_score(
+            job_keywords, resume_keywords, resume_content)
+
+        common_keywords = list(common_keywords) if common_keywords else []
+        missing_keywords = list(missing_keywords) if missing_keywords else []
+
+        missing_hard_skills = list(missing_hard_skills) if missing_hard_skills else []
+        missing_soft_skills = list(missing_soft_skills) if missing_soft_skills else []
+
+        job_keywords_set = set(job_keywords['hard skills'])
+        job_keywords_hard_skills_list = list(
+            job_hard_skills - set(missing_hard_skills))
+
+        job_keywords_set = set(job_keywords['soft skills'])
+        job_keywords_soft_skills_list = list(
+            job_soft_skills - set(missing_soft_skills))
+
+        try:
+            enhancement_suggestions = generate_resume_enhancements(
+                model,
+                resume_content,
+                missing_hard_skills,
+                missing_soft_skills,
+                prompts["resume_enhancer_prompt"]
+            )
+
+            return render_template('optimize_resume.html',
+                                   enhancement_suggestions=enhancement_suggestions,
+                                   resume_content=resume_content,
+                                   missing_hard_skills=missing_hard_skills,
+                                   missing_soft_skills=missing_soft_skills,
+                                   job_hard_skills_list=job_keywords_hard_skills_list,
+                                   job_soft_skills_list=job_keywords_soft_skills_list
+                                   )
+        except Exception as e:
+            print(f"Failed to generate resume enhancements: {str(e)}")
+            return render_template('optimize_resume.html',
+                                   enhancement_suggestions=None,
+                                   resume_content=resume_content,
+                                   missing_hard_skills=missing_hard_skills,
+                                   missing_soft_skills=missing_soft_skills,
+                                   job_hard_skills_list=job_keywords['hard skills'],
+                                   job_soft_skills_list=job_keywords['soft skills']
+                                   )
     else:
         return "Error: Both job description and resume are required to generate a cover letter."
 
