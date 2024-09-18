@@ -188,8 +188,9 @@ def handle_keywords_analyzer(job_url, job_description, resume_file, resume_conte
                                                                                resume_file,
                                                                                resume_content)
 
+
     match_score, common_keywords, missing_keywords = calculate_match_score(job_keywords,
-                                                                           resume_keywords)
+                                                                           resume_keywords, resume_content)
 
     common_keywords = list(common_keywords) if common_keywords else []
     missing_keywords = list(missing_keywords) if missing_keywords else []
@@ -219,7 +220,7 @@ def handle_cover_letter_generation(job_url, job_description, resume_file, resume
             job_url, job_description, resume_file, resume_content)
 
         match_score, common_keywords, missing_keywords = calculate_match_score(
-            job_keywords, resume_keywords)
+            job_keywords, resume_keywords, resume_content)
 
         common_keywords = list(common_keywords) if common_keywords else []
         missing_keywords = list(missing_keywords) if missing_keywords else []
