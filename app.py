@@ -2,7 +2,6 @@ import os
 import hashlib
 from flask import Flask, request, render_template
 from llm.generate_cover_letter import generate_cover
-from llm.markdown_proofreader import proofreader
 from utils.prompt_loader import \
     load_prompts_from_directory  # Adjust the import as necessary
 from loaders.document_loaders import extract_text_from_file  # Import your document loader
@@ -188,9 +187,9 @@ def handle_keywords_analyzer(job_url, job_description, resume_file, resume_conte
                                                                                resume_file,
                                                                                resume_content)
 
-
     match_score, common_keywords, missing_keywords = calculate_match_score(job_keywords,
-                                                                           resume_keywords, resume_content)
+                                                                           resume_keywords,
+                                                                           resume_content)
 
     common_keywords = list(common_keywords) if common_keywords else []
     missing_keywords = list(missing_keywords) if missing_keywords else []
@@ -215,7 +214,6 @@ def handle_keywords_analyzer(job_url, job_description, resume_file, resume_conte
 
 def handle_cover_letter_generation(job_url, job_description, resume_file, resume_content):
     if (job_url or job_description) and (resume_file or resume_content):
-
         job_description, job_keywords, resume_content, resume_keywords = load_data(
             job_url, job_description, resume_file, resume_content)
 
@@ -238,11 +236,8 @@ def handle_cover_letter_generation(job_url, job_description, resume_file, resume
                                       job_keywords_set, prompts[
                                           "generate_cover_prompt"])
 
-        proofread_cover_letter = proofreader(model, cover_letter, job_keywords_list,
-                                             prompts[
-                                                 "markdown_proofreader_prompt"])
 
-        return render_template('cover_letter.html', cover_letter=proofread_cover_letter,
+        return render_template('cover_letter.html', cover_letter=cover_letter,
                                common_keywords=common_keywords,
                                missing_keywords=missing_keywords,
                                job_keywords=job_keywords_list,

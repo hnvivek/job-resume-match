@@ -1,6 +1,6 @@
 from langchain_groq import ChatGroq
 from langchain_core.output_parsers import JsonOutputParser
-from data_models.keywords import KeywordsModel
+from data_models.keywords_model import KeywordsModel
 
 def extract_keywords(model, user_input, sys_prompt):
     llm = ChatGroq(
