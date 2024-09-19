@@ -6,6 +6,8 @@
     <title>Job Analysis Tool</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
         .highlight-common {
@@ -102,19 +104,19 @@
 
         <!-- Results Section (if available) -->
         {% if match_score %}
-        <div class="space-y-8">
             <h2 class="text-xl font-bold">Analysis Results</h2>
-            <div class="p-2 rounded-lg shadow-lg component-box">
-
-                <!-- Grid with Gauge and Missing/Matching Keywords -->
-                <div class="grid grid-cols-2 gap-8 items-start">
-                    <!-- Gauge Chart for Match Score -->
-                    <div id="gauge-container" class="flex items-center justify-center">
-                        <div id="gauge-chart" style="width: 250px; height: 250px;"></div>
-                    </div>
-
+            <!-- Matching Score and Keywords -->
+            <div class="grid grid-cols-2 gap-8 items-start">
+                <div class="p-2 rounded-lg shadow-lg component-box">
+                    <!-- Grid with Gauge and Missing/Matching Keywords -->
+                    <h2 class="text-lg font-bold">Matching Score</h2>
+                        <!-- Gauge Chart for Match Score -->
+                        <div id="gauge-container" class="flex items-center justify-center">
+                            <div id="gauge-chart" style="width: 250px; height: 250px;"></div>
+                        </div>
+                </div>
                     <!-- Missing and Matching Keywords (Side by Side) -->
-                    <div class="bg-white p-2 rounded-lg component-box">
+                <div class="bg-white p-2 rounded-lg component-box">
                         <!-- Matching Keywords -->
                         <h4 class="text-lg font-bold mb-2">Matching Keywords</h4>
                         <ul id="matching-keywords-list" class="flex flex-wrap gap-2">
@@ -132,29 +134,24 @@
                         </ul>
                     </div>
                 </div>
-            </div>
 
-             <!-- Fixed Headers Outside the Scrollable Container -->
-            <div class="grid grid-cols-2 gap-8">
-                <div class="header-fixed">
-                    <h2 class="text-xl font-bold">Job Description</h2>
-                </div>
-                <div class="header-fixed">
-                    <h2 class="text-xl font-bold">Resume</h2>
-                </div>
-            </div>
+            <div class="flex h-screen">
+    <!-- Job Description Column -->
+    <div class="w-1/2 p-4 flex flex-col">
+        <h2 class="text-xl font-bold mb-2">Job Description</h2>
+        <div class="bg-white p-2 rounded-lg shadow-lg flex-grow overflow-y-auto">
+            <div id="job-description" class="whitespace-pre-wrap">{{ job_description | safe }}</div>
+        </div>
+    </div>
 
-            <div class="grid grid-cols-2 gap-8 scrollable-container">
-                <!-- Job Description Column -->
-                <div class="bg-white p-2 rounded-lg shadow-lg component-box">
-                    <div id="job-description" class="whitespace-pre-wrap">{{ job_description | safe }}</div>
-                </div>
-
-                <!-- Resume Column -->
-                <div class="bg-white p-2 rounded-lg shadow-lg component-box">
-                    <div id="resume-text" class="whitespace-pre-wrap">{{ resume_content | safe }}</div>
-                </div>
-            </div>
+    <!-- Resume Column -->
+    <div class="w-1/2 p-4 flex flex-col">
+        <h2 class="text-xl font-bold mb-2">Resume</h2>
+        <div class="bg-white p-2 rounded-lg shadow-lg flex-grow overflow-y-auto">
+            <div id="resume-text" class="whitespace-pre-wrap">{{ resume_content | safe }}</div>
+        </div>
+    </div>
+</div>
 
             <!-- Keywords Highlight Section -->
             <div class="p-2 rounded-lg shadow-lg component-box">
@@ -197,6 +194,7 @@
 
     <!-- JavaScript for Google Gauge Chart and highlighting keywords dynamically -->
     <script>
+
         // Go back to the previous page
     function goBack() {
         window.history.back();
