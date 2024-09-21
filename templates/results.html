@@ -6,295 +6,685 @@
     <title>Job Analysis Tool</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+    <!-- Add html2canvas library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
-        .highlight-common {
-            background-color: green;
-            color: white;
-            border-radius: 9999px; /* Rounded pill */
-            padding: 0.2rem 0.6rem;
-        }
-        .highlight-missing {
-            background-color: red;
-            color: white;
-            border-radius: 9999px; /* Rounded pill */
-            padding: 0.2rem 0.6rem;
-        }
-        .highlight-unique {
-            background-color: blue;
-            color: white;
-            border-radius: 9999px; /* Rounded pill */
-            padding: 0.2rem 0.6rem;
+        :root {
+            --primary-bg: #f3f4f6;
+            --secondary-bg: #ffffff;
+            --primary-text: #1f2937;
+            --secondary-text: #4b5563;
+            --accent-blue: #1e40af;
+            --accent-purple: #5b21b6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --header-footer-bg: #1f2937;
+            --header-footer-text: #ffffff;
         }
 
-        /* Fixed header for Job Description and Resume */
-        .header-fixed {
-            position: relative;
-            top: 0;
-            background-color: white;
-            z-index: 10;
-            padding: 1rem 0;
-            margin-bottom: 1rem;
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--primary-text);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .highlight-common {
+            display: inline-block;
+            background-color: #dcfce7; /* bg-green-100 */
+            color: #29745b; /* text-green-800 */
+            padding: 0.25rem 0.75rem; /* px-3 py-1 */
+            border-radius: 9999px; /* rounded-full */
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 600; /* font-semibold */
+            margin-right: 0.5rem; /* mr-2 */
+            margin-bottom: 0.5rem; /* mb-2 */
+        }
+
+        .highlight-missing {
+            display: inline-block;
+            background-color: #fee2e2; /* bg-red-100 */
+            color: #a12b2c; /* text-red-800 */
+            padding: 0.25rem 0.75rem; /* px-3 py-1 */
+            border-radius: 9999px; /* rounded-full */
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 600; /* font-semibold */
+            margin-right: 0.5rem; /* mr-2 */
+            margin-bottom: 0.5rem; /* mb-2 */
+        }
+
+
+        .highlight-unique {
+            display: inline-block;
+            background-color: #a4ccff; /* bg-blue-100 */
+            color: #1e40af; /* text-blue-800 */
+            padding: 0.25rem 0.75rem; /* px-3 py-1 */
+            border-radius: 9999px; /* rounded-full */
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 600; /* font-semibold */
+            margin-right: 0.5rem; /* mr-2 */
+            margin-bottom: 0.5rem; /* mb-2 */
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            gap: 0.5rem;
+        }
+
+        .stat-card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--secondary-bg);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        /* Style for shadow effect on all components */
-        .component-box {
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .keywords-row {
+            display: flex;
+            gap: 1rem;
         }
 
-        /* Ensure the container does not cover the text */
-        .scrollable-container {
+        /* Button styles */
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            cursor: pointer;
+            user-select: none;
+            border: 1px solid transparent;
+            border-radius: 9999px;
+            transition: all 0.15s ease-in-out;
+        }
+
+        .btn-primary {
+            color: #ffffff;
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .btn-secondary {
+            color: #ffffff;
+            background-color: #4b5563;
+            border-color: #4b5563;
+        }
+
+        .btn-secondary:hover {
+            background-color: #374151;
+            border-color: #374151;
+        }
+
+
+        .keywords-column {
+            flex: 1;
+            background-color: var(--secondary-bg);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-height: 300px;
             overflow-y: auto;
-            max-height: 96vh;
         }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .component-box {
+            background-color: var(--secondary-bg);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow-y: auto !important;
+        }
+
+        .gauge-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .gauge-chart {
+            width: 100%;
+            max-width: 60px; /* Reduced from 150px */
+            height: auto;
+        }
+
+        .gauge-chart__text {
+            font-family: sans-serif;
+            font-size: 2rem; /* Reduced from 2rem */
+            font-weight: bold;
+            fill: #1f2937;
+        }
+
+        .gauge-chart__circle {
+            fill: none;
+            stroke: #e5e7eb;
+        }
+
+        .gauge-chart__progress {
+            fill: none;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s ease-in-out, stroke 0.5s ease-in-out;
+            transform: rotate(-90deg);
+            transform-origin: center;
+        }
+
+        .keywords-container {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .stat-value {
+            font-size: 2rem; /* Reduced from 1.5rem */
+            font-weight: bold;
+            color: var(--accent-blue);
+        }
+
+        h3.stat-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        .stat-value-total { color: var(--accent-blue); }
+        .stat-value-matching { color: var(--accent-green); }
+        .stat-value-missing { color: var(--accent-red); }
+        .skills-row {
+            display: flex;
+            gap: 1rem;
+        }
+        .skills-column {
+            flex: 1;
+            background-color: var(--secondary-bg);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .skill-item {
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+        }
+        .skill-match {
+            background-color: var(--accent-green);
+            color: white;
+        }
+        .skill-missing {
+            background-color: var(--accent-red);
+            color: white;
+        }
+        @media print {
+            .page-break-before {
+                page-break-before: always;
+                page-break-inside: avoid; /* Added to prevent breaking inside */
+            }
+               body {
+                font-size: 10px !important;
+            }
+
+            .container {
+                width: 100% !important;
+                max-width: none !important;
+                padding: 0 !important;
+            }
+
+            .section, .component-box, #job-description, #resume-text {
+                page-break-inside: avoid !important;
+                margin-bottom: 20px !important;
+            }
+
+            .stats-row {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                margin: 0 !important;
+                padding: 10px 0 !important;
+            }
+
+            .stat-card {
+                flex: 1 1 auto !important;
+                margin: 5px !important;
+                padding: 5px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important;
+                align-items: center !important;
+                min-width: 100px !important;
+                max-width: 150px !important;
+            }
+
+            .stat-title {
+                margin: 0 !important;
+                padding: 0 !important;
+                font-size: 12px !important;
+                font-weight: bold !important;
+            }
+
+            .stat-value {
+                margin: 5px 0 0 0 !important;
+                padding: 0 !important;
+                font-size: 24px !important;
+                font-weight: bold !important;
+            }
+
+            .gauge-container div {
+                font-size: 24px !important;
+                font-weight: bold !important;
+                text-align: center !important;
+            }
+        }
+
     </style>
-    <!-- Google Charts -->
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <!-- html2pdf.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
-
-
 </head>
 <body class="flex flex-col min-h-screen">
-
-   <!-- Header -->
-    <header class="bg-gray-800 text-white py-2 flex justify-between items-center">
-        <div class="container mx-auto flex justify-between items-center">
-            <!-- Back Button on the Left -->
-            <button onclick="goBack()" class="bg-gray-700 text-white py-2 px-4 rounded hover:bg-gray-600">
+    <!-- Header -->
+    <header class="bg-gray-800 text-white py-4">
+        <div class="container mx-auto flex justify-between items-center px-4">
+            <button onclick="goBack()" class="btn btn-secondary">
                 ← Back
             </button>
             <h1 class="text-3xl font-bold text-center">Job Keyword Analysis Dashboard</h1>
-            <!-- Export Button on the Right -->
             <button onclick="exportPDF()" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500">
                 Export PDF
             </button>
         </div>
     </header>
 
-    <main id="report-content"  class="flex-grow container mx-auto py-2">
-
-        <div class="flex items-center justify-between mb-2">
-             <!-- Logo on the left side -->
-            <div class="flex items-center">
-                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo"
-                     class="w-48 h-auto mr-4">
-
-            </div>
-
-            <!-- Legend Section -->
-            <div class="flex space-x-4">
+    <main id="report-content" class="flex-grow container py-8">
+        <!-- Legend Section -->
+        <div class="flex justify-center mb-6">
+            <div class="flex items-center space-x-4 bg-white p-3 rounded-lg shadow">
                 <div class="flex items-center">
                     <span class="w-4 h-4 bg-green-500 rounded-full mr-2"></span>
-                    <span>Matching Keywords</span>
+                    <span class="text-sm font-medium">Matching Keywords</span>
                 </div>
                 <div class="flex items-center">
                     <span class="w-4 h-4 bg-red-500 rounded-full mr-2"></span>
-                    <span>Missing Keywords</span>
+                    <span class="text-sm font-medium">Missing Keywords</span>
                 </div>
                 <div class="flex items-center">
                     <span class="w-4 h-4 bg-blue-500 rounded-full mr-2"></span>
-                    <span>Keywords</span>
+                    <span class="text-sm font-medium">Keywords</span>
                 </div>
             </div>
         </div>
 
         <!-- Results Section (if available) -->
         {% if match_score %}
-            <h2 class="text-xl font-bold">Analysis Results</h2>
-            <!-- Matching Score and Keywords -->
-            <div class="grid grid-cols-2 gap-8 items-start">
-                <div class="p-2 rounded-lg shadow-lg component-box">
-                    <!-- Grid with Gauge and Missing/Matching Keywords -->
-                    <h2 class="text-lg font-bold">Matching Score</h2>
-                        <!-- Gauge Chart for Match Score -->
-                        <div id="gauge-container" class="flex items-center justify-center">
-                            <div id="gauge-chart" style="width: 250px; height: 250px;"></div>
-                        </div>
-                </div>
-                    <!-- Missing and Matching Keywords (Side by Side) -->
-                <div class="bg-white p-2 rounded-lg component-box">
-                        <!-- Matching Keywords -->
-                        <h4 class="text-lg font-bold mb-2">Matching Keywords</h4>
-                        <ul id="matching-keywords-list" class="flex flex-wrap gap-2">
-                            {% for keyword in common_keywords %}
-                                <li class="highlight-common">{{ keyword }}</li>
-                            {% endfor %}
-                        </ul>
+            <h2 class="text-2xl font-bold mb-4">Analysis Results</h2>
 
-                        <!-- Missing Keywords -->
-                        <h4 class="text-lg font-bold mb-2 mt-2">Missing Keywords</h4>
-                        <ul id="missing-keywords-list" class="flex flex-wrap gap-2">
-                            {% for keyword in missing_keywords %}
-                                <li class="highlight-missing">{{ keyword }}</li>
-                            {% endfor %}
-                        </ul>
+            <div class="section">
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <h3 class="stat-title">Matching Score</h3>
+                        <div class="gauge-container">
+                            <svg class="gauge-chart" viewBox="0 0 100 100">
+                                <circle class="gauge-chart__circle" cx="50" cy="50" r="45" stroke-width="10" />
+                                <circle class="gauge-chart__progress" cx="50" cy="50" r="45" stroke-width="10" />
+                                <text class="gauge-chart__text" x="50" y="50" text-anchor="middle" dominant-baseline="central">0%</text>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <h3 class="stat-title">Total Keywords</h3>
+                        <div class="stat-value stat-value-total" id="total-keywords">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3 class="stat-title">Matching Keywords</h3>
+                        <div class="stat-value stat-value-matching" id="matching-keywords-count">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3 class="stat-title">Missing Keywords</h3>
+                        <div class="stat-value stat-value-missing" id="missing-keywords-count">0</div>
                     </div>
                 </div>
+            </div>
 
-            <div class="flex h-screen">
-    <!-- Job Description Column -->
-    <div class="w-1/2 p-4 flex flex-col">
-        <h2 class="text-xl font-bold mb-2">Job Description</h2>
-        <div class="bg-white p-2 rounded-lg shadow-lg flex-grow overflow-y-auto">
-            <div id="job-description" class="whitespace-pre-wrap">{{ job_description | safe }}</div>
-        </div>
-    </div>
-
-    <!-- Resume Column -->
-    <div class="w-1/2 p-4 flex flex-col">
-        <h2 class="text-xl font-bold mb-2">Resume</h2>
-        <div class="bg-white p-2 rounded-lg shadow-lg flex-grow overflow-y-auto">
-            <div id="resume-text" class="whitespace-pre-wrap">{{ resume_content | safe }}</div>
-        </div>
-    </div>
-</div>
-
-            <!-- Keywords Highlight Section -->
-            <div class="p-2 rounded-lg shadow-lg component-box">
-                <!-- Job Description Keywords: common + missing -->
-                <h4 class="text-lg font-bold mb-2 mt-2">Job Description Keywords</h4>
-                <div id="job-keywords" class="flex flex-wrap gap-2">
-                    {% for keyword in common_keywords %}
-                        <!-- Common Keywords in green -->
-                        <span class="highlight-common">{{ keyword }}</span>
-                    {% endfor %}
-                    {% for keyword in missing_keywords %}
-                        <!-- Missing Keywords in red -->
-                        <span class="highlight-missing">{{ keyword }}</span>
-                    {% endfor %}
+            <div class="section">
+            <div class="skills-row">
+                <div class="skills-column">
+                    <h4 class="text-lg font-bold mb-4">Hard Skills</h4>
+                    <div id="hard-skills-list" class="skills-list">
+                        <!-- This will be populated by JavaScript -->
+                    </div>
                 </div>
-
-                <!-- Resume Keywords: common + unique resume -->
-                <h4 class="text-lg font-bold mb-2 mt-2">Resume Keywords</h4>
-                <div id="resume-keywords" class="flex flex-wrap gap-2">
-                    {% for keyword in common_keywords %}
-                        <!-- Common Keywords in green -->
-                        <span class="highlight-common">{{ keyword }}</span>
-                    {% endfor %}
-                    {% for keyword in resume_keywords %}
-                        {% if keyword not in common_keywords %}
-                            <!-- Unique Resume Keywords in blue -->
-                            <span class="highlight-unique">{{ keyword }}</span>
-                        {% endif %}
-                    {% endfor %}
-    </div>
-</div>
-
-
+                <div class="skills-column">
+                    <h4 class="text-lg font-bold mb-4">Soft Skills</h4>
+                    <div id="soft-skills-list" class="skills-list">
+                        <!-- This will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
         </div>
+
+            <div class="section">
+                <div class="component-grid">
+                    <div class="component-box">
+                        <h2 class="text-xl font-bold mb-4">Job Description</h2>
+                        <div id="job-description" class="whitespace-pre-wrap overflow-y-auto" style="max-height: 400px;">
+                            {{ job_description | safe }}
+                        </div>
+                    </div>
+                    <div class="component-box">
+                        <h2 class="text-xl font-bold mb-4">Resume</h2>
+                        <div id="resume-text" class="whitespace-pre-wrap overflow-y-auto" style="max-height: 400px;">
+                            {{ resume_content | safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="section">
+                <div class="component-box">
+                    <h4 class="text-lg font-bold mb-4">Job Description Keywords</h4>
+                    <div id="job-keywords" class="flex flex-wrap gap-2 mb-4">
+                        {% for keyword in common_keywords %}
+                            <span class="highlight-common">{{ keyword }}</span>
+                        {% endfor %}
+                        {% for keyword in missing_keywords %}
+                            <span class="highlight-missing">{{ keyword }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <h4 class="text-lg font-bold mb-4">Resume Keywords</h4>
+                    <div id="resume-keywords" class="flex flex-wrap gap-2">
+                        {% for keyword in common_keywords %}
+                            <span class="highlight-common">{{ keyword }}</span>
+                        {% endfor %}
+                        {% for keyword in resume_keywords %}
+                            {% if keyword not in common_keywords %}
+                                <span class="highlight-unique">{{ keyword }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
         {% endif %}
     </main>
 
     <!-- Footer -->
-       {% include 'footer.html' %}
+    <footer class="bg-gray-800 text-white py-4 mt-auto">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2024 Resume Optimization. All rights reserved.</p>
+        </div>
+    </footer>
 
-    <!-- JavaScript for Google Gauge Chart and highlighting keywords dynamically -->
     <script>
-
-        // Go back to the previous page
-    function goBack() {
-        window.history.back();
-    }
-
-    // Export the page as a PDF using html2pdf
-    function exportPDF() {
-        // Get the current timestamp
-        const now = new Date();
-        const timestamp = now.getFullYear() + "-" +
-                          ("0" + (now.getMonth() + 1)).slice(-2) + "-" +
-                          ("0" + now.getDate()).slice(-2) + "_" +
-                          ("0" + now.getHours()).slice(-2) + "-" +
-                          ("0" + now.getMinutes()).slice(-2) + "-" +
-                          ("0" + now.getSeconds()).slice(-2);
-
-        // Set the filename with the timestamp
-        const filename = `job-analysis-report_${timestamp}.pdf`;
-
-        var element = document.getElementById('report-content');
-        var opt = {
-            margin:       0.5,
-            filename:     filename,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2 },
-            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-        };
-        html2pdf().from(element).set(opt).save();
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        const jobKeywords = {{ job_keywords | tojson | safe }};
-        const resumeKeywords = {{ resume_keywords | tojson | safe }};
-        const commonKeywords = {{ common_keywords | tojson | safe }};
-        const missingKeywords = {{ missing_keywords | tojson | safe }};
-        const matchScore = {{ match_score }};
-
-        // Function to escape special regex characters in the keyword
-        function escapeRegex(keyword) {
-            return keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        function goBack() {
+            window.history.back();
         }
 
-        // Function to safely highlight keywords ensuring whole word matching
-        function highlightText(containerId, keywords, highlightClass) {
-            const container = document.getElementById(containerId);
-            if (!container) return;
+        function exportPDF() {
+    const now = new Date();
+    const timestamp = now.getFullYear() + "-" +
+                      ("0" + (now.getMonth() + 1)).slice(-2) + "-" +
+                      ("0" + now.getDate()).slice(-2) + "_" +
+                      ("0" + now.getHours()).slice(-2) + "-" +
+                      ("0" + now.getMinutes()).slice(-2) + "-" +
+                      ("0" + now.getSeconds()).slice(-2);
 
-            let content = container.innerHTML;  // Get the existing HTML content
+    const filename = `job-analysis-report_${timestamp}.pdf`;
 
-            // Loop through keywords and replace them with highlighted spans
-            keywords.forEach(keyword => {
-                const safeKeyword = escapeRegex(keyword);
-                const regex = new RegExp(`\\b(${safeKeyword})\\b(?![^<]*>)`, 'gi');  // Ensure whole word match
-                content = content.replace(regex, `<mark class="${highlightClass}">$1</mark>`);
-            });
+    // Clone the report content
+    const reportContent = document.getElementById('report-content').cloneNode(true);
 
-            // Update the HTML content with the highlighted text
-            container.innerHTML = content;
-        }
+    // Get the match score
+    const matchScore = parseFloat(document.querySelector('.gauge-chart__text').textContent);
 
-        // Apply the highlighting to the job description and resume
-        highlightText('job-description', jobKeywords, 'highlight-unique');
-        highlightText('resume-text', resumeKeywords, 'highlight-unique');
-        highlightText('job-description', commonKeywords, 'highlight-common');
-        highlightText('resume-text', commonKeywords, 'highlight-common');
-        highlightText('job-description', missingKeywords, 'highlight-missing');
+    // Replace the SVG gauge with a text percentage
+    const gaugeContainer = reportContent.querySelector('.gauge-container');
+    const percentageText = document.createElement('div');
+    percentageText.textContent = `${matchScore}%`;
+    percentageText.style.fontSize = '24px';
+    percentageText.style.fontWeight = 'bold';
+    percentageText.style.color = matchScore < 33 ? '#ef4444' : matchScore < 66 ? '#fbbf24' : '#10b981';
+    percentageText.style.textAlign = 'center';
+    gaugeContainer.innerHTML = '';
+    gaugeContainer.appendChild(percentageText);
 
-        // Load the Google Charts for the Gauge
-        google.charts.load('current', {'packages':['gauge']});
-        google.charts.setOnLoadCallback(drawGauge);
+    // Adjust layout for better PDF rendering
+    const adjustElements = (elements, styles) => {
+        elements.forEach(el => {
+            Object.assign(el.style, styles);
+        });
+    };
 
-        function drawGauge() {
-            const data = google.visualization.arrayToDataTable([
-                ['Label', 'Value'],
-                ['Match %', matchScore]
-            ]);
-
-            const options = {
-                width: 250,
-                height: 250,
-                redFrom: 0,
-                redTo: 50,
-                yellowFrom: 50,
-                yellowTo: 80,
-                greenFrom: 80,
-                greenTo: 100,
-                minorTicks: 5,
-                max: 100,
-                animation: {
-                    duration: 1000,
-                    easing: 'out'
-                },
-                format: '##%'
-            };
-
-            const chart = new google.visualization.Gauge(document.getElementById('gauge-chart'));
-            chart.draw(data, options);
-        }
+    // Remove any existing page-break-before classes
+    reportContent.querySelectorAll('.page-break-before').forEach(el => {
+        el.classList.remove('page-break-before');
     });
-    </script>
 
+    // Adjust the stats row layout
+    const statsRow = reportContent.querySelector('.stats-row');
+    if (statsRow) {
+        statsRow.style.display = 'flex';
+        statsRow.style.flexWrap = 'wrap';
+        statsRow.style.justifyContent = 'space-between';
+        statsRow.style.alignItems = 'center';
+        statsRow.style.margin = '0';
+        statsRow.style.padding = '10px 0';
+    }
+
+    // Adjust individual stat cards
+    adjustElements(reportContent.querySelectorAll('.stat-card'), {
+        flex: '1 1 auto',
+        margin: '5px',
+        padding: '5px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minWidth: '100px',
+        maxWidth: '150px'
+    });
+
+    // Adjust stat titles and values
+    adjustElements(reportContent.querySelectorAll('.stat-title'), {
+        margin: '0',
+        padding: '0',
+        fontSize: '12px',
+        fontWeight: 'bold'
+    });
+
+    adjustElements(reportContent.querySelectorAll('.stat-value'), {
+        margin: '5px 0 0 0',
+        padding: '0',
+        fontSize: '24px',
+        fontWeight: 'bold'
+    });
+
+    // Adjust other sections (skills, job description, resume)
+    adjustElements(reportContent.querySelectorAll('.section'), {
+        marginBottom: '15px',
+        pageBreakInside: 'avoid'
+    });
+
+    adjustElements(reportContent.querySelectorAll('.skills-row'), {
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        marginBottom: '15px'
+    });
+
+    adjustElements(reportContent.querySelectorAll('.skills-column'), {
+        flex: '0 0 48%',
+        marginBottom: '10px'
+    });
+
+    // Modify the layout of job description and resume
+    const componentGrid = reportContent.querySelector('.component-grid');
+    if (componentGrid) {
+        componentGrid.style.display = 'block';
+        const jobDescription = componentGrid.querySelector('.component-box:nth-child(1)');
+        const resume = componentGrid.querySelector('.component-box:nth-child(2)');
+
+        if (jobDescription && resume) {
+            jobDescription.style.marginBottom = '20px';
+            resume.style.marginBottom = '20px';
+            jobDescription.style.pageBreakAfter = 'always';
+        }
+    }
+
+    adjustElements(reportContent.querySelectorAll('.component-box, #job-description, #resume-text'), {
+        maxHeight: 'none',
+        overflow: 'visible',
+        textAlign: 'justify',
+        hyphens: 'auto',
+        wordBreak: 'break-word',
+        pageBreakInside: 'avoid',
+        marginBottom: '15px',
+        fontSize: '11px'
+    });
+
+    // Generate PDF from the modified content
+    const opt = {
+        margin: [15, 15, 15, 15], // top, left, bottom, right
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+            scale: 2,
+            logging: false,
+            useCORS: true
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    html2pdf().from(reportContent).set(opt).save();
+}
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const jobKeywords = {{ job_keywords | tojson | safe }};
+            const resumeKeywords = {{ resume_keywords | tojson | safe }};
+            const commonKeywords = {{ common_keywords | tojson | safe }};
+            const missingKeywords = {{ missing_keywords | tojson | safe }};
+            const matchScore = {{ match_score }};
+
+            // Assume we have these arrays defined (you'll need to provide these)
+            const hardSkills = {{ hard_skills | tojson | safe }};
+            const softSkills = {{ soft_skills | tojson | safe }};
+
+            function populateSkillsList(skillsArray, containerId) {
+                const container = document.getElementById(containerId);
+                skillsArray.forEach(skill => {
+                    const skillElement = document.createElement('span');
+                    skillElement.textContent = skill;
+                    skillElement.classList.add('skill-item');
+
+                    if (commonKeywords.includes(skill)) {
+                        skillElement.classList.add('highlight-common');
+                    } else if (missingKeywords.includes(skill)) {
+                        skillElement.classList.add('highlight-missing');
+                    }
+
+                    container.appendChild(skillElement);
+                });
+            }
+
+            populateSkillsList(hardSkills, 'hard-skills-list');
+            populateSkillsList(softSkills, 'soft-skills-list');
+
+            function escapeRegex(keyword) {
+                return keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }
+
+            function highlightText(containerId, keywords, highlightClass) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+
+                let content = container.innerHTML;
+
+                keywords.forEach(keyword => {
+                    const safeKeyword = escapeRegex(keyword);
+                    const regex = new RegExp(`\\b(${safeKeyword})\\b(?![^<]*>|[^<>]*</)`, 'gi');
+                    content = content.replace(regex, `<mark class="${highlightClass}">$1</mark>`);
+                });
+
+                container.innerHTML = content;
+            }
+
+            highlightText('resume-text', resumeKeywords, 'highlight-unique');
+            highlightText('job-description', commonKeywords, 'highlight-common');
+            highlightText('resume-text', commonKeywords, 'highlight-common');
+            highlightText('job-description', missingKeywords, 'highlight-missing');
+
+            function updateGauge(percentage) {
+    percentage = Math.min(100, Math.max(0, Number(percentage)));
+
+    const circumference = 2 * Math.PI * 45;
+    const offset = circumference - (percentage / 100) * circumference;
+    const progressCircle = document.querySelector('.gauge-chart__progress');
+    const percentageText = document.querySelector('.gauge-chart__text');
+
+    progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+    progressCircle.style.strokeDashoffset = circumference;
+
+    // Determine color based on percentage
+    let color;
+    if (percentage < 33) {
+        color = '#ef4444'; // Red
+    } else if (percentage < 66) {
+        color = '#fbbf24'; // Yellow
+    } else {
+        color = '#10b981'; // Green
+    }
+
+    // Set the stroke color
+    progressCircle.style.stroke = color;
+
+    setTimeout(() => {
+        progressCircle.style.strokeDashoffset = offset;
+        percentageText.textContent = `${percentage.toFixed(0)}%`;
+        percentageText.style.fill = color; // Optional: change text color to match ring
+    }, 100);
+}
+
+            // Update statistics
+            document.getElementById('total-keywords').textContent = jobKeywords.length;
+            document.getElementById('matching-keywords-count').textContent = commonKeywords.length;
+            document.getElementById('missing-keywords-count').textContent = missingKeywords.length;
+
+            // Convert matchScore to a number and call updateGauge
+            updateGauge(Number(matchScore));
+        });
+    </script>
 </body>
 </html>

@@ -6,14 +6,44 @@
     <title>Job Analysis Tool</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        :root {
+            --primary-bg: #f3f4f6;
+            --secondary-bg: #ffffff;
+            --primary-text: #1f2937;
+            --accent-blue: #1e40af;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+        }
+
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background-color: var(--primary-bg);
+            color: var(--primary-text);
+        }
+
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .form-section {
+            background-color: var(--secondary-bg);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
         .hidden {
             display: none;
         }
 
-        /* Spinner Overlay */
         .spinner-overlay {
             position: fixed;
             top: 0;
@@ -44,263 +74,186 @@
                 transform: rotate(360deg);
             }
         }
+
+        .error-message {
+            color: var(--accent-red);
+            font-size: 0.875rem;
+        }
+
+        .submit-btn {
+            margin-right: 1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.25rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 0.5rem;
+            color: white;
+            text-align: center;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .btn-indigo {
+            background-color: var(--accent-blue);
+        }
+
+        .btn-indigo:hover {
+            background-color: #27459a;
+        }
+
+        .btn-green {
+            background-color: var(--accent-green);
+        }
+
+        .btn-green:hover {
+            background-color: #0b8f6e;
+        }
+
+        .btn-yellow {
+            background-color: #fbbf24;
+        }
+
+        .btn-yellow:hover {
+            background-color: #f59e0b;
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
+    <!-- Header -->
+    <header class="bg-gray-800 text-white py-4">
+        <div class="container">
+            <h1 class="text-3xl font-bold text-center">Job Analysis Tool</h1>
+        </div>
+    </header>
 
-<!-- Header -->
-<header class="bg-gray-800 text-white py-4">
-    <div class="container mx-auto">
-        <h1 class="text-3xl font-bold text-center">Job Analysis Tool</h1>
+    <!-- Main Content Area -->
+    <main class="flex-grow container py-8">
+        <!-- Form Section -->
+        <div class="form-section">
+            <form method="POST" enctype="multipart/form-data" id="jobForm">
+                <!-- Job Input Method -->
+                <div class="input-group">
+                    <label for="jobMethod" class="block text-lg font-medium">How would you like to provide the job details?</label>
+                    <div class="mt-2">
+                        <input type="radio" id="jobMethodUrl" name="jobMethod" value="url" checked>
+                        <label for="jobMethodUrl">Job URL</label>
+                        <input type="radio" id="jobMethodPaste" name="jobMethod" value="paste" class="ml-4">
+                        <label for="jobMethodPaste">Paste Job Description (Recommended)</label>
+                    </div>
+                </div>
+
+                <!-- Job URL Section -->
+                <div id="jobUrlSection" class="input-group">
+                    <label for="jobUrl" class="block text-lg font-medium">Job URL:</label>
+                    <input type="text" id="jobUrl" name="jobUrl" class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500">
+                    <span id="jobUrlError" class="error-message hidden">Please enter a valid Job URL.</span>
+                </div>
+
+                <!-- Paste Job Description Section -->
+                <div id="pasteJobSection" class="input-group hidden">
+                    <label for="jobDescription" class="block text-lg font-medium">Job Description:</label>
+                    <textarea id="jobDescription" name="jobDescription" class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 h-40"></textarea>
+                    <span id="jobDescriptionError" class="error-message hidden">Please paste the job description.</span>
+                </div>
+
+                <!-- Resume Input Method -->
+                <div class="input-group">
+                    <label for="resumeMethod" class="block text-lg font-medium">How would you like to provide your resume?</label>
+                    <div class="mt-2">
+                        <input type="radio" id="resumeMethodUpload" name="resumeMethod" value="upload" checked>
+                        <label for="resumeMethodUpload">Upload Resume</label>
+                        <input type="radio" id="resumeMethodPaste" name="resumeMethod" value="paste" class="ml-4">
+                        <label for="resumeMethodPaste">Paste Resume Content</label>
+                    </div>
+                </div>
+
+                <!-- Upload Resume Section -->
+                <div id="fileUploadSection" class="input-group">
+                    <label for="file" class="block text-lg font-medium">Upload Resume:</label>
+                    <input type="file" id="file" name="file" accept=".pdf,.docx" class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500">
+                    <span id="fileUploadError" class="error-message hidden">Please upload your resume.</span>
+                </div>
+
+                <!-- Paste Resume Section -->
+                <div id="pasteResumeSection" class="input-group hidden">
+                    <label for="resumeContent" class="block text-lg font-medium">Paste Resume Content:</label>
+                    <textarea id="resumeContent" name="resumeContent" class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 h-40"></textarea>
+                    <span id="resumeContentError" class="error-message hidden">Please paste your resume.</span>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="mt-6 flex">
+                    <button type="submit" name="action" value="analyze" class="submit-btn btn btn-indigo">
+                        Analyze Keywords
+                    </button>
+                    <button type="submit" name="action" value="generate_cover_letter" class="submit-btn btn btn-green">
+                        Generate Cover Letter
+                    </button>
+                    <button type="submit" name="action" value="optimize_resume" class="submit-btn btn btn-yellow">
+                        Optimize Resume
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Spinner Overlay -->
+    <div id="spinner" class="spinner-overlay hidden">
+        <div class="spinner"></div>
     </div>
-</header>
 
-<!-- Main Content Area -->
-<main class="flex-grow container mx-auto py-8">
-    <!-- Form Section -->
-    <form method="POST" enctype="multipart/form-data" class="mb-8" id="jobForm">
-
-        <!-- Select Job Input Method -->
-        <div class="mb-4">
-            <label class="block text-lg font-medium text-gray-700">How would you like to
-                provide the job details?</label>
-            <select id="jobMethod" name="jobMethod"
-                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                <option value="url">Job URL</option>
-                <option value="paste">Paste Job Description (Recommended)</option>
-            </select>
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-4 mt-auto">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2024 Resume Optimization. All rights reserved.</p>
         </div>
+    </footer>
 
-        <!-- Job URL Section -->
-        <div class="mb-4" id="jobUrlSection">
-            <label for="jobUrl" class="block text-lg font-medium text-gray-700">Job
-                URL:</label>
-            <input type="text" id="jobUrl" name="jobUrl" placeholder="Enter Job URL"
-                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-            <span id="jobUrlError" class="hidden text-red-600 text-sm"></span>
-            <!-- Error Message for Job URL -->
-
-        </div>
-
-        <!-- Paste Job Description Section (Initially Hidden) -->
-        <div class="mb-4 hidden" id="pasteJobSection">
-            <label for="jobDescription" class="block text-lg font-medium text-gray-700">Job
-                Description:</label>
-            <textarea id="jobDescription" name="jobDescription"
-                      placeholder="Paste the job description here"
-                      class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm h-40"></textarea>
-            <span id="jobDescriptionError" class="hidden text-red-600 text-sm"></span>
-            <!-- Error Message for Job Description -->
-
-        </div>
-
-        <!-- Select Resume Input Method -->
-        <div class="mb-4">
-            <label class="block text-lg font-medium text-gray-700">How would you like to
-                provide your resume?</label>
-            <select id="resumeMethod" name="resumeMethod" class="mt-1 block w-full
-                px-3 py-2 border border-gray-300 rounded-md shadow-sm
-                focus:outline-none focus:ring-indigo-500 focus:border-indigo-500
-                sm:text-sm">
-                <option value="upload">Upload Resume</option>
-                <option value="paste">Paste Resume Content</option>
-            </select>
-        </div>
-
-        <!-- File Upload Section -->
-        <div class="mb-4" id="fileUploadSection">
-            <label for="file" class="block text-lg font-medium text-gray-700">Upload
-                Resume:</label>
-            <input type="file" id="file" name="file" accept=".pdf,.docx"
-                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-            <span id="fileUploadError" class="hidden text-red-600 text-sm"></span>
-            <!-- Error Message for File Upload -->
-        </div>
-
-        <!-- Paste Resume Section (Initially Hidden) -->
-        <div class="mb-4 hidden" id="pasteResumeSection">
-            <label for="resumeContent" class="block text-lg font-medium text-gray-700">Paste
-                Resume Content:</label>
-            <textarea id="resumeContent" name="resumeContent"
-                      placeholder="Paste your resume here" class="mt-1 block w-full px-3 py-2 border
-                border-gray-300 rounded-md shadow-sm focus:outline-none
-                focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm h-40"></textarea>
-            <span id="resumeContentError" class="hidden text-red-600 text-sm"></span>
-            <!-- Error Message for Resume Content -->
-        </div>
-
-        <div class="flex space-x-4">
-            <!-- Keywords Analyzer Button -->
-            <button type="submit" name="action" value="analyze"
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
-                Keywords Analyzer
-            </button>
-
-            <!-- Generate Cover Letter Button -->
-            <button type="submit" name="action" value="generate_cover_letter"
-                    class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                Generate Cover Letter
-            </button>
-
-            <button type="submit" name="action" value="optimize_resume"
-                    class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
-                Optimize Resume
-            </button>
-        </div>
-    </form>
-</main>
-
-<!-- Spinner Overlay -->
-<div id="spinner" class="spinner-overlay hidden">
-    <div class="spinner"></div>
-</div>
-
-<!-- Footer -->
-
-{% include 'footer.html' %}
-
-
-<!-- JavaScript to Show/Hide Inputs Based on Selections -->
-<script>
-
-    // Function to update visibility of job input fields based on selection
-    function updateJobInputVisibility() {
-        const selectedMethod = document.getElementById('jobMethod').value;
-        const jobUrlSection = document.getElementById('jobUrlSection');
-        const pasteJobSection = document.getElementById('pasteJobSection');
-
-        if (selectedMethod === 'url') {
-            jobUrlSection.classList.remove('hidden');
-            pasteJobSection.classList.add('hidden');
-        } else if (selectedMethod === 'paste') {
-            jobUrlSection.classList.add('hidden');
-            pasteJobSection.classList.remove('hidden');
-        }
-    }
-
-    // Function to update visibility of resume input fields based on selection
-    function updateResumeInputVisibility() {
-        const selectedMethod = document.getElementById('resumeMethod').value;
-        const fileUploadSection = document.getElementById('fileUploadSection');
-        const pasteResumeSection = document.getElementById('pasteResumeSection');
-
-        if (selectedMethod === 'upload') {
-            fileUploadSection.classList.remove('hidden');
-            pasteResumeSection.classList.add('hidden');
-        } else if (selectedMethod === 'paste') {
-            fileUploadSection.classList.add('hidden');
-            pasteResumeSection.classList.remove('hidden');
-        }
-    }
-
-    // Show/Hide Job Input Fields Based on Selection
-    document.getElementById('jobMethod').addEventListener('change', function () {
-        localStorage.setItem('jobMethod', this.value); // Save selected method
-        updateJobInputVisibility();
-    });
-
-    // Show/Hide Resume Input Fields Based on Selection
-    document.getElementById('resumeMethod').addEventListener('change', function () {
-        localStorage.setItem('resumeMethod', this.value); // Save selected resume method
-        updateResumeInputVisibility();
-    });
-
-    // Save job description to local storage
-    const jobDescriptionTextarea = document.getElementById('jobDescription');
-    jobDescriptionTextarea.addEventListener('input', function () {
-        localStorage.setItem('jobDescription', jobDescriptionTextarea.value);
-    });
-
-    // Load data from local storage on page load
-    window.addEventListener('load', function () {
-        const savedJobDescription = localStorage.getItem('jobDescription');
-        if (savedJobDescription) {
-            jobDescriptionTextarea.value = savedJobDescription;
+    <!-- JavaScript to Show/Hide Inputs Based on Selections -->
+    <script>
+        function updateJobInputVisibility() {
+            const selectedMethod = document.querySelector('input[name="jobMethod"]:checked').value;
+            document.getElementById('jobUrlSection').classList.toggle('hidden', selectedMethod !== 'url');
+            document.getElementById('pasteJobSection').classList.toggle('hidden', selectedMethod !== 'paste');
         }
 
-        const savedJobMethod = localStorage.getItem('jobMethod') || 'paste';
-        if (savedJobMethod) {
-            document.getElementById('jobMethod').value = savedJobMethod;
-            updateJobInputVisibility(); // Update visibility based on saved method
+        function updateResumeInputVisibility() {
+            const selectedMethod = document.querySelector('input[name="resumeMethod"]:checked').value;
+            document.getElementById('fileUploadSection').classList.toggle('hidden', selectedMethod !== 'upload');
+            document.getElementById('pasteResumeSection').classList.toggle('hidden', selectedMethod !== 'paste');
         }
 
-        const savedResumeMethod = localStorage.getItem('resumeMethod');
-        if (savedResumeMethod) {
-            document.getElementById('resumeMethod').value = savedResumeMethod;
-            updateResumeInputVisibility(); // Update visibility based on saved resume method
-        }
-    });
+        document.querySelectorAll('input[name="jobMethod"]').forEach(el => {
+            el.addEventListener('change', updateJobInputVisibility);
+        });
 
-    // Function to validate if either job description or resume is provided
-    function validateForm() {
-        const jobMethod = document.getElementById('jobMethod').value;
-        const resumeMethod = document.getElementById('resumeMethod').value;
-        const jobUrl = document.getElementById('jobUrl').value.trim();
-        const jobDescription = document.getElementById('jobDescription').value.trim();
-        const resumeContent = document.getElementById('resumeContent').value.trim();
-        const fileInput = document.getElementById('file').value.trim();
+        document.querySelectorAll('input[name="resumeMethod"]').forEach(el => {
+            el.addEventListener('change', updateResumeInputVisibility);
+        });
 
-        // Variables to track validity
-        let jobValid = false;
-        let resumeValid = false;
+        document.getElementById('jobForm').addEventListener('submit', function (event) {
+            const jobValid = (document.querySelector('input[name="jobMethod"]:checked').value === 'url' && document.getElementById('jobUrl').value.trim()) ||
+                (document.querySelector('input[name="jobMethod"]:checked').value === 'paste' && document.getElementById('jobDescription').value.trim());
 
-        // Clear previous error messages
-        document.getElementById('jobUrlError').classList.add('hidden');
-        document.getElementById('jobDescriptionError').classList.add('hidden');
-        document.getElementById('fileUploadError').classList.add('hidden');
-        document.getElementById('resumeContentError').classList.add('hidden');
+            const resumeValid = (document.querySelector('input[name="resumeMethod"]:checked').value === 'upload' && document.getElementById('file').value.trim()) ||
+                (document.querySelector('input[name="resumeMethod"]:checked').value === 'paste' && document.getElementById('resumeContent').value.trim());
 
-        // Check if job description or resume is provided
-        if (jobMethod === 'url' && jobUrl) {
-            jobValid = true;
-        } else if (jobMethod === 'paste' && jobDescription) {
-            jobValid = true;
-        } else {
-            // Show error for Job URL or Job Description
-            if (jobMethod === 'url') {
-                document.getElementById('jobUrlError').textContent = "Please enter a valid Job URL.";
-                document.getElementById('jobUrlError').classList.remove('hidden');
-            } else if (jobMethod === 'paste') {
-                document.getElementById('jobDescriptionError').textContent = "Please paste the Job Description.";
-                document.getElementById('jobDescriptionError').classList.remove('hidden');
+            if (!jobValid || !resumeValid) {
+                event.preventDefault();
+                if (!jobValid) {
+                    document.getElementById('jobUrlError').classList.remove('hidden');
+                    document.getElementById('jobDescriptionError').classList.remove('hidden');
+                }
+                if (!resumeValid) {
+                    document.getElementById('fileUploadError').classList.remove('hidden');
+                    document.getElementById('resumeContentError').classList.remove('hidden');
+                }
+            } else {
+                document.getElementById('spinner').classList.remove('hidden');
             }
-        }
-
-        if (resumeMethod === 'upload' && fileInput) {
-            resumeValid = true;
-        } else if (resumeMethod === 'paste' && resumeContent) {
-            resumeValid = true;
-        } else {
-            // Show error for File Upload or Resume Content
-            if (resumeMethod === 'upload') {
-                document.getElementById('fileUploadError').textContent = "Please upload your resume.";
-                document.getElementById('fileUploadError').classList.remove('hidden');
-            } else if (resumeMethod === 'paste') {
-                document.getElementById('resumeContentError').textContent = "Please paste your resume.";
-                document.getElementById('resumeContentError').classList.remove('hidden');
-            }
-        }
-
-        // If either job or resume is valid, allow form submission
-        if (!jobValid || !resumeValid) {
-            return false; // Prevent form submission
-        }
-
-        return true; // Allow form submission
-    }
-
-    // Add validation on form submit
-    document.getElementById('jobForm').addEventListener('submit', function (event) {
-        // Show spinner only if form is valid
-        if (!validateForm()) {
-            event.preventDefault(); // Prevent form submission if validation fails
-        } else {
-            document.getElementById('spinner').classList.remove('hidden');
-        }
-    });
-
-
-</script>
-
+        });
+    </script>
 </body>
 </html>

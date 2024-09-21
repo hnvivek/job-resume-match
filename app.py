@@ -185,8 +185,10 @@ def handle_keywords_analyzer(job_url, job_description, resume_file, resume_conte
                            missing_keywords=missing_keywords,
                            job_description=job_description or "",
                            resume_content=resume_content or "",
-                           job_keywords=job_keywords_list,
-                           resume_keywords=resume_keywords_list)
+                           job_keywords=list(job_keywords_set),
+                           resume_keywords=resume_keywords_list,
+                                   hard_skills=list(hard_skills),
+                                   soft_skills=list(soft_skills))
 
 
 def handle_cover_letter_generation(job_url, job_description, resume_file, resume_content):
