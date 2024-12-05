@@ -202,9 +202,6 @@
     // Dynamically injected cover letter from the backend
     var markdownCoverLetter = `{{ cover_letter | tojson | safe }}`;  // Get the cover letter content
 
-    // Verify and process markdown
-    {#markdownCoverLetter = markdownCoverLetter.replace(/^"|"$/g, ''); // Remove leading and trailing quotes#}
-
     // Replace single line breaks with <br> for line breaks, or keep double breaks for paragraphs
     markdownCoverLetter = markdownCoverLetter.replace(/(\r\n|\n|\r)/g, '<br>'); // Replace newlines with <br>
 
