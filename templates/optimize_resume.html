@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resume Optimization</title>
 
-     <!-- Tracking Script -->
+    <!-- Tracking Script -->
     <script src="{{ url_for('static', filename='js/tracking.js') }}" defer></script>
 
     <!-- Tailwind CSS -->
@@ -21,11 +21,40 @@
     </script>
 
     <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Button styles */
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            cursor: pointer;
+            user-select: none;
+            border: 1px solid transparent;
+            border-radius: 9999px;
+            transition: all 0.15s ease-in-out;
+        }
+
+        .btn-secondary {
+            color: #ffffff;
+            background-color: #4b5563;
+            border-color: #4b5563;
+        }
+
+        .btn-secondary:hover {
+            background-color: #374151;
+            border-color: #374151;
+        }
+    </style>
 </head>
 <body class="flex flex-col min-h-screen bg-gray-100">
-    <!-- Header -->
-    <header class="bg-gray-800 text-white py-4">
+<!-- Header -->
+<header class="bg-gray-800 text-white py-4">
         <div class="container mx-auto flex justify-between items-center px-4">
             <button onclick="goBack()" class="btn btn-secondary">
                 ← Back
@@ -35,208 +64,223 @@
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="flex-grow container mx-auto py-8 px-4">
-        <div class="grid grid-cols-3 items-center mb-6">
-            <!-- Empty left column for balance -->
-            <div class="hidden sm:block"></div>
+<!-- Main Content -->
+<main class="flex-grow container mx-auto py-8 px-4">
+    <div class="grid grid-cols-3 items-center mb-6">
+        <!-- Empty left column for balance -->
+        <div class="hidden sm:block"></div>
 
-            <!-- Centered Legend -->
-            <div class="col-span-3 sm:col-span-1 flex justify-center mb-4 sm:mb-0">
-                <div class="flex items-center space-x-4 bg-white p-3 rounded-lg shadow">
-                    <div class="flex items-center">
-                        <span class="w-4 h-4 bg-green-500 rounded-full mr-2"></span>
-                        <span class="text-sm font-medium">Matching Keywords</span>
-                    </div>
-                    <div class="flex items-center">
-                        <span class="w-4 h-4 bg-red-500 rounded-full mr-2"></span>
-                        <span class="text-sm font-medium">Missing Keywords</span>
-                    </div>
-                    <div class="flex items-center">
-                        <span class="w-4 h-4 bg-blue-500 rounded-full mr-2"></span>
-                        <span class="text-sm font-medium">Keywords</span>
-                    </div>
+        <!-- Centered Legend -->
+        <div class="col-span-3 sm:col-span-1 flex justify-center mb-4 sm:mb-0">
+            <div class="flex items-center space-x-4 bg-white p-3 rounded-lg shadow">
+                <div class="flex items-center">
+                    <span class="w-4 h-4 bg-green-500 rounded-full mr-2"></span>
+                    <span class="text-sm font-medium">Matching Keywords</span>
                 </div>
-            </div>
-
-            <!-- Right-aligned Filter -->
-            <div class="col-span-3 sm:col-span-1 flex justify-center sm:justify-end">
-                <div class="bg-white p-3 rounded-lg shadow">
-                    <label for="suggestions-filter" class="text-sm font-medium text-gray-700 mr-2">Filter Suggestions:</label>
-                    <select id="suggestions-filter" class="pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
-                        <option value="all">All Suggestions</option>
-                        <option value="optimizations">Optimizations</option>
-                        <option value="new">New Additions</option>
-                    </select>
+                <div class="flex items-center">
+                    <span class="w-4 h-4 bg-red-500 rounded-full mr-2"></span>
+                    <span class="text-sm font-medium">Missing Keywords</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-4 h-4 bg-blue-500 rounded-full mr-2"></span>
+                    <span class="text-sm font-medium">Keywords</span>
                 </div>
             </div>
         </div>
 
-        <!-- Enhancement Suggestions -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <!-- Hard Skills Column -->
-            <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
-                <h2 class="text-2xl font-bold mb-4 text-gray-800">Hard Skills</h2>
-                <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-                    {% for skill in job_hard_skills_list %}
-                        <span class="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold mr-2 mb-2">{{ skill }}</span>
-                    {% endfor %}
-                    {% for skill in missing_hard_skills %}
-                        <span class="inline-block bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold mr-2 mb-2">{{ skill }}</span>
-                    {% endfor %}
-                </div>
-                <h3 class="text-xl font-bold mb-4 text-gray-700">Recommendations</h3>
-                {% for suggestion in enhancement_suggestions.hard_skills %}
-                    <article class="mb-6 p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow duration-300 suggestion-item" data-type="{{ 'optimizations' if suggestion.original else 'new' }}">
-                        <header class="flex justify-between items-center mb-2">
-                            <h4 class="text-lg font-semibold text-blue-800">{{ suggestion.keyword }}</h4>
-                        </header>
+        <!-- Right-aligned Filter -->
+        <div class="col-span-3 sm:col-span-1 flex justify-center sm:justify-end">
+            <div class="bg-white p-3 rounded-lg shadow">
+                <label for="suggestions-filter"
+                       class="text-sm font-medium text-gray-700 mr-2">Filter
+                    Suggestions:</label>
+                <select id="suggestions-filter"
+                        class="pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                    <option value="all">All Suggestions</option>
+                    <option value="optimizations">Optimizations</option>
+                    <option value="new">New Additions</option>
+                </select>
+            </div>
+        </div>
+    </div>
 
-                        {% if suggestion.original %}
-                        <div class="mb-2">
-                            <h5 class="font-semibold text-gray-700">Current Resume Text</h5>
-                            <p class="text-gray-600">{{ suggestion.original }}</p>
-                        </div>
-                        {% endif %}
-
-                        <div class="bg-blue-800 text-white p-3 rounded-lg mb-2">
-                            <div class="flex justify-between items-center">
-                                <h5 class="font-semibold">{{ 'Optimized Version' if suggestion.original else 'New Addition' }}</h5>
-                                <button class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50 transition-colors duration-300"
-                                        onclick="copyToClipboard('{{ suggestion.modified_or_new | replace("'", "\\'") }}', this)">
-                                    Copy
-                                </button>
-                            </div>
-                            <p class="recommendation-text mt-2">{{ suggestion.modified_or_new }}</p>
-                        </div>
-
-                        <div class="mb-2">
-                            <h5 class="font-semibold text-gray-700">How to Implement</h5>
-                            <p class="text-gray-600">{{ suggestion.suggestion }}</p>
-                        </div>
-
-                        <div class="mb-2">
-                            <h5 class="font-semibold text-gray-700">Where to Place</h5>
-                            <p class="text-gray-600">{{ suggestion.placement }}</p>
-                        </div>
-
-                        <div>
-                            <h5 class="font-semibold text-gray-700">Why This Matters</h5>
-                            <p class="text-gray-600">{{ suggestion.rationale }}</p>
-                        </div>
-                    </article>
+    <!-- Enhancement Suggestions -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <!-- Hard Skills Column -->
+        <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Hard Skills</h2>
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                {% for skill in job_hard_skills_list %}
+                <span class="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold mr-2 mb-2">{{ skill }}</span>
+                {% endfor %}
+                {% for skill in missing_hard_skills %}
+                <span class="inline-block bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold mr-2 mb-2">{{ skill }}</span>
                 {% endfor %}
             </div>
+            <h3 class="text-xl font-bold mb-4 text-gray-700">Recommendations</h3>
+            {% for suggestion in enhancement_suggestions.hard_skills %}
+            <article
+                    class="mb-6 p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow duration-300 suggestion-item"
+                    data-type="{{ 'optimizations' if suggestion.original else 'new' }}">
+                <header class="flex justify-between items-center mb-2">
+                    <h4 class="text-lg font-semibold text-blue-800">{{ suggestion.keyword
+                        }}</h4>
+                </header>
 
-            <!-- Soft Skills Column -->
-            <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
-                <h2 class="text-2xl font-bold mb-4 text-gray-800">Soft Skills</h2>
-                <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-                    {% for skill in job_soft_skills_list %}
-                        <span class="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold mr-2 mb-2">{{ skill }}</span>
-                    {% endfor %}
-                    {% for skill in missing_soft_skills %}
-                        <span class="inline-block bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold mr-2 mb-2">{{ skill }}</span>
-                    {% endfor %}
+                {% if suggestion.original %}
+                <div class="mb-2">
+                    <h5 class="font-semibold text-gray-700">Current Resume Text</h5>
+                    <p class="text-gray-600">{{ suggestion.original }}</p>
                 </div>
-                <h3 class="text-xl font-bold mb-4 text-gray-700">Recommendations</h3>
-                {% for suggestion in enhancement_suggestions.soft_skills %}
-                    <article class="mb-6 p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow duration-300 suggestion-item" data-type="{{ 'optimizations' if suggestion.original else 'new' }}">
-                        <header class="flex justify-between items-center mb-2">
-                            <h4 class="text-lg font-semibold text-purple-800">{{ suggestion.keyword }}</h4>
-                        </header>
+                {% endif %}
 
-                        {% if suggestion.original %}
-                        <div class="mb-2">
-                            <h5 class="font-semibold text-gray-700">Current Resume Text</h5>
-                            <p class="text-gray-600">{{ suggestion.original }}</p>
-                        </div>
-                        {% endif %}
+                <div class="bg-blue-800 text-white p-3 rounded-lg mb-2">
+                    <div class="flex justify-between items-center">
+                        <h5 class="font-semibold">{{ 'Optimized Version' if
+                            suggestion.original else 'New Addition' }}</h5>
+                        <button class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50 transition-colors duration-300"
+                                onclick="copyToClipboard('{{ suggestion.modified_or_new | replace("
+                        '", "\\'") }}', this)">
+                        Copy
+                        </button>
+                    </div>
+                    <p class="recommendation-text mt-2">{{ suggestion.modified_or_new
+                        }}</p>
+                </div>
 
-                        <div class="bg-purple-800 text-white p-3 rounded-lg mb-2">
-                            <div class="flex justify-between items-center">
-                                <h5 class="font-semibold">{{ 'Optimized Version' if suggestion.original else 'New Addition' }}</h5>
-                                <button class="bg-purple-500 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:ring-opacity-50 transition-colors duration-300"
-                                        onclick="copyToClipboard('{{ suggestion.modified_or_new | replace("'", "\\'") }}', this)">
-                                    Copy
-                                </button>
-                            </div>
-                            <p class="recommendation-text mt-2">{{ suggestion.modified_or_new }}</p>
-                        </div>
+                <div class="mb-2">
+                    <h5 class="font-semibold text-gray-700">How to Implement</h5>
+                    <p class="text-gray-600">{{ suggestion.suggestion }}</p>
+                </div>
 
-                        <div class="mb-2">
-                            <h5 class="font-semibold text-gray-700">How to Implement</h5>
-                            <p class="text-gray-600">{{ suggestion.suggestion }}</p>
-                        </div>
+                <div class="mb-2">
+                    <h5 class="font-semibold text-gray-700">Where to Place</h5>
+                    <p class="text-gray-600">{{ suggestion.placement }}</p>
+                </div>
 
-                        <div class="mb-2">
-                            <h5 class="font-semibold text-gray-700">Where to Place</h5>
-                            <p class="text-gray-600">{{ suggestion.placement }}</p>
-                        </div>
+                <div>
+                    <h5 class="font-semibold text-gray-700">Why This Matters</h5>
+                    <p class="text-gray-600">{{ suggestion.rationale }}</p>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
 
-                        <div>
-                            <h5 class="font-semibold text-gray-700">Why This Matters</h5>
-                            <p class="text-gray-600">{{ suggestion.rationale }}</p>
-                        </div>
-                    </article>
+        <!-- Soft Skills Column -->
+        <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Soft Skills</h2>
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                {% for skill in job_soft_skills_list %}
+                <span class="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold mr-2 mb-2">{{ skill }}</span>
+                {% endfor %}
+                {% for skill in missing_soft_skills %}
+                <span class="inline-block bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold mr-2 mb-2">{{ skill }}</span>
                 {% endfor %}
             </div>
+            <h3 class="text-xl font-bold mb-4 text-gray-700">Recommendations</h3>
+            {% for suggestion in enhancement_suggestions.soft_skills %}
+            <article
+                    class="mb-6 p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow duration-300 suggestion-item"
+                    data-type="{{ 'optimizations' if suggestion.original else 'new' }}">
+                <header class="flex justify-between items-center mb-2">
+                    <h4 class="text-lg font-semibold text-purple-800">{{
+                        suggestion.keyword }}</h4>
+                </header>
+
+                {% if suggestion.original %}
+                <div class="mb-2">
+                    <h5 class="font-semibold text-gray-700">Current Resume Text</h5>
+                    <p class="text-gray-600">{{ suggestion.original }}</p>
+                </div>
+                {% endif %}
+
+                <div class="bg-purple-800 text-white p-3 rounded-lg mb-2">
+                    <div class="flex justify-between items-center">
+                        <h5 class="font-semibold">{{ 'Optimized Version' if
+                            suggestion.original else 'New Addition' }}</h5>
+                        <button class="bg-purple-500 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:ring-opacity-50 transition-colors duration-300"
+                                onclick="copyToClipboard('{{ suggestion.modified_or_new | replace("
+                        '", "\\'") }}', this)">
+                        Copy
+                        </button>
+                    </div>
+                    <p class="recommendation-text mt-2">{{ suggestion.modified_or_new
+                        }}</p>
+                </div>
+
+                <div class="mb-2">
+                    <h5 class="font-semibold text-gray-700">How to Implement</h5>
+                    <p class="text-gray-600">{{ suggestion.suggestion }}</p>
+                </div>
+
+                <div class="mb-2">
+                    <h5 class="font-semibold text-gray-700">Where to Place</h5>
+                    <p class="text-gray-600">{{ suggestion.placement }}</p>
+                </div>
+
+                <div>
+                    <h5 class="font-semibold text-gray-700">Why This Matters</h5>
+                    <p class="text-gray-600">{{ suggestion.rationale }}</p>
+                </div>
+            </article>
+            {% endfor %}
         </div>
-    </main>
+    </div>
+</main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-4 mt-auto">
-        <div class="container mx-auto text-center">
-            <p>&copy; 2024 Resume Optimization. All rights reserved.</p>
-        </div>
-    </footer>
+<!-- Footer -->
+<footer class="bg-gray-800 text-white py-4 mt-auto">
+    <div class="container mx-auto text-center">
+        <p>&copy; 2024 Resume Optimization. All rights reserved.</p>
+    </div>
+</footer>
 
-    <!-- JavaScript -->
-    <script>
-        function goBack() {
-            window.history.back();
-        }
+<!-- JavaScript -->
+<script>
+    function goBack() {
+        window.history.back();
+    }
 
-        function copyToClipboard(text, button) {
-            navigator.clipboard.writeText(text).then(function () {
-                const originalText = button.textContent;
-                button.textContent = 'Copied!';
-                button.classList.add('bg-green-500');
-                setTimeout(function () {
-                    button.textContent = originalText;
-                    button.classList.remove('bg-green-500');
-                }, 2000);
-            }, function (err) {
-                console.error('Could not copy text: ', err);
-            });
-        }
+    function copyToClipboard(text, button) {
+        navigator.clipboard.writeText(text).then(function () {
+            const originalText = button.textContent;
+            button.textContent = 'Copied!';
+            button.classList.add('bg-green-500');
+            setTimeout(function () {
+                button.textContent = originalText;
+                button.classList.remove('bg-green-500');
+            }, 2000);
+        }, function (err) {
+            console.error('Could not copy text: ', err);
+        });
+    }
 
-        // Function to highlight the keyword in a case-insensitive way
-        function highlightKeyword(originalText, keyword) {
-            const regex = new RegExp(`(${keyword})`, 'gi');
-            return originalText.replace(regex, '<span class="bg-yellow-300 text-blue-800 font-bold">$1</span>');
-        }
+    // Function to highlight the keyword in a case-insensitive way
+    function highlightKeyword(originalText, keyword) {
+        const regex = new RegExp(`(${keyword})`, 'gi');
+        return originalText.replace(regex, '<span class="bg-yellow-300 text-blue-800 font-bold">$1</span>');
+    }
 
-        // Apply highlighting to all recommendation text elements and set up filter
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.recommendation-text').forEach(function (element) {
-                const originalText = element.textContent;
-                const keyword = element.closest('article').querySelector('h4').textContent.trim();
-                element.innerHTML = highlightKeyword(originalText, keyword);
-            });
+    // Apply highlighting to all recommendation text elements and set up filter
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.recommendation-text').forEach(function (element) {
+            const originalText = element.textContent;
+            const keyword = element.closest('article').querySelector('h4').textContent.trim();
+            element.innerHTML = highlightKeyword(originalText, keyword);
+        });
 
-            // Single filter functionality
-            document.getElementById('suggestions-filter').addEventListener('change', function(e) {
-                const filterValue = e.target.value;
-                document.querySelectorAll('.suggestion-item').forEach(function(item) {
-                    if (filterValue === 'all' || item.dataset.type === filterValue) {
-                        item.style.display = '';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
+        // Single filter functionality
+        document.getElementById('suggestions-filter').addEventListener('change', function (e) {
+            const filterValue = e.target.value;
+            document.querySelectorAll('.suggestion-item').forEach(function (item) {
+                if (filterValue === 'all' || item.dataset.type === filterValue) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
             });
         });
-    </script>
+    });
+</script>
 </body>
 </html>
