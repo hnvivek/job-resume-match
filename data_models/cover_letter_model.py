@@ -10,3 +10,4 @@ class CoverLetterModel(BaseModel):
     body_paragraph_2: str = Field(description="The second body paragraph of the cover letter")
     closing_paragraph: str = Field(description="The closing paragraph of the cover letter")
     complimentary_close: str = Field(description="The complimentary close of the cover letter")
+    cover_letter_name: str = Field(description="The combination of position name and company name")

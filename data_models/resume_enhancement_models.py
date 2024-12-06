@@ -3,11 +3,11 @@ from typing import List, Optional
 
 class EnhancementSuggestion(BaseModel):
     keyword: str = Field(description="The keyword being suggested")
-    suggestion: str = Field(description="Suggestion on how to incorporate the keyword")
+    # suggestion: str = Field(description="Suggestion on how to incorporate the keyword")
     original: Optional[str] = Field(default=None, description="Original bullet point if modifying existing content")
     modified_or_new: str = Field(description="Modified or new bullet point")
-    placement: str = Field(description="Where to add or modify in the resume")
-    rationale: str = Field(description="Explanation of why this suggestion is realistic")
+    placement: str = Field(description="Where to add or modify in the resume with the section name containing title and company")
+    # rationale: str = Field(description="Explanation of why this suggestion is realistic")
 
 class ResumeEnhancementSuggestions(BaseModel):
     hard_skills: List[EnhancementSuggestion] = Field(description="Suggestions for incorporating hard skills")

@@ -198,14 +198,16 @@
 
     // Initialize Quill editor
     var quill = new Quill('#editor-container', {
-        theme: 'snow'  // Use the 'snow' theme for the toolbar
+        theme: 'snow'
     });
 
-    // Dynamically injected cover letter from the backend
-    var markdownCoverLetter = `{{ cover_letter | tojson | safe }}`;  // Get the cover letter content
-
-    // Replace single line breaks with <br> for line breaks, or keep double breaks for paragraphs
-    markdownCoverLetter = markdownCoverLetter.replace(/(\r\n|\n|\r)/g, '<br>'); // Replace newlines with <br>
+    // Get and process the cover letter content for editor display
+    var markdownCoverLetter = `{{ cover_letter }}`
+        .replace(/â€™/g, "'")
+        .replace(/â€œ/g, '"')
+        .replace(/â€/g, '"')
+        .replace(/(\n\s*\n\s*\n\s*)+/g, '\n')  // Collapse multiple line breaks to single
+        .replace(/\n/g, '<br>');
 
     // Parse the markdown to HTML
     var formattedCoverLetter = marked.parse(markdownCoverLetter);
@@ -215,37 +217,35 @@
 
     // Download button functionality
     document.getElementById("download-button").addEventListener("click", function () {
-        // Get the HTML content from the Quill editor
-        var coverLetterHTML = quill.root.innerHTML;
+        // Get the HTML content and process it for Word
+        var coverLetterHTML = quill.root.innerHTML
+            // Replace multiple <br> tags with single paragraphs
+            .replace(/(<br\s*\/?>\s*){2,}/g, '</p><p>')
+            // Replace single <br> with space
+            .replace(/<br\s*\/?>/g, ' ')
+            // Wrap content in paragraphs if not already
+            .replace(/^(.+?)$/, '<p>$1</p>');
 
-
-        markdownCoverLetter = markdownCoverLetter.replace(/<br>/g, '\n\n');
-
-
-        // Ensure the content isn't empty before converting
+        // Ensure the content isn't empty
         if (coverLetterHTML.trim() === "") {
             alert("The content is empty. Please add content before downloading.");
             return;
         }
 
-        // Convert HTML to a DOCX file using htmlDocx
         try {
             var convertedDocx = htmlDocx.asBlob(coverLetterHTML);
-
-            // Optional: Customize the filename
-            var filename = prompt("Enter a filename for the document:", "cover_letter") || "cover_letter";
-
-            // Use FileSaver.js to save the file
+            var filename = prompt("Enter a filename for the document:",
+                    "`{{ file_name }}`") ||
+                "cover_letter";
             saveAs(convertedDocx, filename + ".docx");
-
             console.log("Document successfully generated and saved as " + filename + ".docx");
         } catch (error) {
             console.error("An error occurred during the conversion:", error);
             alert("An error occurred while generating the document.");
         }
     });
-
 </script>
+
 
 </body>
 </html>

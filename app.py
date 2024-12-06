@@ -6,11 +6,11 @@ from llm.resume_enhancement_generator import generate_resume_enhancements
 from utils.prompt_loader import \
     load_prompts_from_directory  # Adjust the import as necessary
 from loaders.document_loaders import extract_text_from_file  # Import your document loader
-from llm.keyword_extraction import extract_keywords  # Import your LLM extractor
 from utils.score_calculation import calculate_match_score  # Import your scoring function
 from utils.scraper import fetch_text_from_url
 from werkzeug.utils import secure_filename
 from utils.text_processing import process_text_for_model, truncate_text
+from utils.skills_extractor import SkillsExtractor
 from dotenv import load_dotenv
 
 app = Flask(__name__)
@@ -21,6 +21,7 @@ groq_api_key = None
 model = None
 max_tokens = None
 
+skills_extractor = SkillsExtractor()
 
 def initial_loaders():
     """Initializes environment variables, prompts, and other settings."""
@@ -100,10 +101,12 @@ def load_data(job_url, job_description, resume_file, resume_content):
     job_keywords = get_cached_keywords('job_description', job_description)
     if not job_keywords and job_description:
         # If not cached, process and cache it
-        job_keywords = extract_keywords(model,
-                                        process_text_for_model(text=job_description,
-                                                               max_tokens=max_tokens),
-                                        prompts["extract_keywords"])
+        # job_keywords = extract_keywords(model,
+        #                                 process_text_for_model(text=job_description,
+        #                                                        max_tokens=max_tokens),
+        #                                 prompts["extract_keywords"])
+        job_keywords = skills_extractor.extract_skills(job_description)
+
         cache_keywords('job_description', job_description, job_keywords)
 
     # Handle resume
@@ -116,10 +119,11 @@ def load_data(job_url, job_description, resume_file, resume_content):
     resume_keywords = get_cached_keywords('resume_content', resume_content)
     if not resume_keywords and resume_content:
         # If not cached, process and cache it
-        resume_keywords = extract_keywords(model,
-                                           process_text_for_model(text=resume_content,
-                                                                  max_tokens=max_tokens),
-                                           prompts["extract_keywords"])
+        # resume_keywords = extract_keywords(model,
+        #                                    process_text_for_model(text=resume_content,
+        #                                                           max_tokens=max_tokens),
+        #                                    prompts["extract_keywords"])
+        resume_keywords = skills_extractor.extract_skills(resume_content)
         cache_keywords('resume_content', resume_content, resume_keywords)
 
     return job_description, job_keywords, resume_content, resume_keywords
@@ -162,8 +166,8 @@ def analyze_keywords():
         missing_keywords=list(missing_keywords or []),
         job_description=job_description or "",
         resume_content=resume_content or "",
-        job_keywords=list(set(job_keywords['hard skills']).union(set(job_keywords['soft skills']))),
-        resume_keywords=list(set(resume_keywords['hard skills']).union(set(resume_keywords['soft skills']))),
+        job_keywords=list(set(job_keywords['hard_skills']).union(set(job_keywords['soft_skills']))),
+        resume_keywords=list(set(resume_keywords['hard_skills']).union(set(resume_keywords['soft_skills']))),
         hard_skills=list(hard_skills),
         soft_skills=list(soft_skills)
     )
@@ -188,18 +192,19 @@ def generate_cover_letter():
             job_keywords, resume_keywords, resume_content
         )
 
-        job_keywords_set = set(job_keywords['hard skills']).union(set(job_keywords['soft skills']))
-        cover_letter = generate_cover(
+        job_keywords_set = set(job_keywords['hard_skills']).union(set(job_keywords['soft_skills']))
+        cover_letter , file_name = generate_cover(
             model, job_description, resume_content, job_keywords_set,
             prompts["generate_cover_prompt"]
         )
 
         return render_template('cover_letter.html',
             cover_letter=cover_letter,
+            file_name =file_name + " cover letter",
             common_keywords=list(common_keywords or []),
             missing_keywords=list(missing_keywords or []),
             job_keywords=list(job_keywords_set),
-            resume_keywords=list(set(resume_keywords['hard skills']).union(set(resume_keywords['soft skills'])))
+            resume_keywords=list(set(resume_keywords['hard_skills']).union(set(resume_keywords['soft_skills'])))
         )
     except Exception as e:
         print(f"Failed to generate cover letter: {str(e)}")

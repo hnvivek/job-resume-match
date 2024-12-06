@@ -10,3 +10,10 @@
     }
 )()
 ;
+
+(function (n, t, c) {
+    var o = t.createElement("script");
+    o.async = !0, o.src = "https://cdn.buttonizer.io/embed.js", o.onload = function () {
+        window.Buttonizer.init(c)
+    }, t.head.appendChild(o)
+})(window, document, "1ffb16d9-ca6b-4fe2-85e0-d46cf510ca40");
