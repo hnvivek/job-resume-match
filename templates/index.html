@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Analysis Tool</title>
-     <!-- Tracking Script -->
     <script src="{{ url_for('static', filename='js/tracking.js') }}" defer></script>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
     <style>
         :root {
             --primary-bg: #f3f4f6;
@@ -17,18 +17,21 @@
             --accent-blue: #1e40af;
             --accent-green: #10b981;
             --accent-red: #ef4444;
+            --accent-yellow: #fbbf24;
         }
 
         body {
             font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
             background-color: var(--primary-bg);
             color: var(--primary-text);
+            min-height: 100vh;
         }
 
-
         .container {
+            width: 100%;
             max-width: 1200px;
             margin: 0 auto;
+            padding: 0 1rem;
         }
 
         .form-section {
@@ -36,14 +39,70 @@
             padding: 2rem;
             border-radius: 0.5rem;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            max-width: 800px;
         }
 
-        .input-group {
-            margin-bottom: 1.5rem;
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            white-space: nowrap;
+            border: none;
+            color: white;
+            min-width: 160px;
         }
 
-        .hidden {
-            display: none;
+        .btn-indigo {
+            background-color: var(--accent-blue);
+        }
+
+        .btn-indigo:hover {
+            background-color: #1e3a8a;
+            transform: translateY(-1px);
+        }
+
+        .btn-green {
+            background-color: var(--accent-green);
+        }
+
+        .btn-green:hover {
+            background-color: #059669;
+            transform: translateY(-1px);
+        }
+
+        .btn-yellow {
+            background-color: var(--accent-yellow);
+            color: #1f2937;
+        }
+
+        .btn-yellow:hover {
+            background-color: #f59e0b;
+            transform: translateY(-1px);
+        }
+
+        .submit-btn {
+            margin-right: 1rem;
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            position: relative;
+        }
+
+        @media (max-width: 640px) {
+            .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
         }
 
         .spinner-overlay {
@@ -52,11 +111,16 @@
             left: 0;
             width: 100%;
             height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: rgba(0, 0, 0, 0.5);
             z-index: 9999;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .hidden {
+            display: none;
         }
 
         .spinner {
@@ -81,181 +145,229 @@
             color: var(--accent-red);
             font-size: 0.875rem;
         }
-
-        .submit-btn {
-            margin-right: 1rem;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 0.75rem 1.25rem;
-            font-size: 1rem;
-            font-weight: bold;
-            border-radius: 0.5rem;
-            color: white;
-            text-align: center;
-            transition: background-color 0.2s ease-in-out;
-        }
-
-        .btn-indigo {
-            background-color: var(--accent-blue);
-        }
-
-        .btn-indigo:hover {
-            background-color: #27459a;
-        }
-
-        .btn-green {
-            background-color: var(--accent-green);
-        }
-
-        .btn-green:hover {
-            background-color: #0b8f6e;
-        }
-
-        .btn-yellow {
-            background-color: #fbbf24;
-        }
-
-        .btn-yellow:hover {
-            background-color: #f59e0b;
-        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
-    <!-- Header -->
-    <header class="bg-gray-800 text-white py-4">
-        <div class="container">
-            <h1 class="text-3xl font-bold text-center">Job Analysis Tool</h1>
-        </div>
-    </header>
-
-    <!-- Main Content Area -->
-    <main class="flex-grow container py-8">
-        <!-- Form Section -->
-        <div class="form-section">
-            <form method="POST" enctype="multipart/form-data" id="jobForm">
-                <!-- Job Input Method -->
-                <div class="input-group">
-                    <label class="block text-lg font-medium">How would you like to provide the job details?</label>
-                    <div class="mt-2">
-                        <input type="radio" id="jobMethodUrl" name="jobMethod" value="url" checked>
-                        <label for="jobMethodUrl">Job URL</label>
-                        <input type="radio" id="jobMethodPaste" name="jobMethod" value="paste" class="ml-4">
-                        <label for="jobMethodPaste">Paste Job Description (Recommended)</label>
-                    </div>
-                </div>
-
-                <!-- Job URL Section -->
-                <div id="jobUrlSection" class="input-group">
-                    <label for="jobUrl" class="block text-lg font-medium">Job URL:</label>
-                    <input type="text" id="jobUrl" name="jobUrl" class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500">
-                    <span id="jobUrlError" class="error-message hidden">Please enter a valid Job URL.</span>
-                </div>
-
-                <!-- Paste Job Description Section -->
-                <div id="pasteJobSection" class="input-group hidden">
-                    <label for="jobDescription" class="block text-lg font-medium">Job Description:</label>
-                    <textarea id="jobDescription" name="jobDescription" class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 h-40"></textarea>
-                    <span id="jobDescriptionError" class="error-message hidden">Please paste the job description.</span>
-                </div>
-
-                <!-- Resume Input Method -->
-                <div class="input-group">
-                    <label class="block text-lg font-medium">How would you like to provide your resume?</label>
-                    <div class="mt-2">
-                        <input type="radio" id="resumeMethodUpload" name="resumeMethod" value="upload" checked>
-                        <label for="resumeMethodUpload">Upload Resume</label>
-                        <input type="radio" id="resumeMethodPaste" name="resumeMethod" value="paste" class="ml-4">
-                        <label for="resumeMethodPaste">Paste Resume Content</label>
-                    </div>
-                </div>
-
-                <!-- Upload Resume Section -->
-                <div id="fileUploadSection" class="input-group">
-                    <label for="file" class="block text-lg font-medium">Upload Resume:</label>
-                    <input type="file" id="file" name="file" accept=".pdf,.docx" class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500">
-                    <span id="fileUploadError" class="error-message hidden">Please upload your resume.</span>
-                </div>
-
-                <!-- Paste Resume Section -->
-                <div id="pasteResumeSection" class="input-group hidden">
-                    <label for="resumeContent" class="block text-lg font-medium">Paste Resume Content:</label>
-                    <textarea id="resumeContent" name="resumeContent" class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 h-40"></textarea>
-                    <span id="resumeContentError" class="error-message hidden">Please paste your resume.</span>
-                </div>
-
-                <!-- Submit Buttons -->
-                <div class="mt-6 flex">
-                    <button type="submit" name="action" value="analyze" class="submit-btn btn btn-indigo">
-                        Analyze Keywords
-                    </button>
-                    <button type="submit" name="action" value="generate_cover_letter" class="submit-btn btn btn-green">
-                        Generate Cover Letter
-                    </button>
-                    <button type="submit" name="action" value="optimize_resume" class="submit-btn btn btn-yellow">
-                        Optimize Resume
-                    </button>
-                </div>
-            </form>
-        </div>
-    </main>
-
-    <!-- Spinner Overlay -->
-    <div id="spinner" class="spinner-overlay hidden">
-        <div class="spinner"></div>
+<header class="bg-gray-800 text-white py-4 w-full">
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center">Job Analysis Tool</h1>
     </div>
+</header>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-4 mt-auto">
-        <div class="container mx-auto text-center">
-            <p>&copy; 2024 Resume Optimization. All rights reserved.</p>
+<main class="flex-grow container py-8">
+    <div class="form-section">
+        <div id="mainForm" class="space-y-6">
+            <!-- Job Description Section -->
+            <div id="pasteJobSection" class="space-y-2">
+                <label for="jobDescription" class="block text-lg font-medium">Job
+                    Description:</label>
+                <textarea id="jobDescription" name="jobDescription"
+                          class="w-full px-3 py-2 border rounded-md h-40"></textarea>
+                <span id="jobDescriptionError" class="error-message hidden">Please paste the job description.</span>
+            </div>
+
+            <!-- Resume Input Method -->
+            <div class="space-y-4">
+                <label class="block text-lg font-medium">How would you like to provide
+                    your resume?</label>
+                <div class="flex space-x-4">
+                    <div class="flex items-center">
+                        <input type="radio" id="resumeMethodUpload" name="resumeMethod"
+                               value="upload" checked>
+                        <label for="resumeMethodUpload" class="ml-2">Upload Resume</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="resumeMethodPaste" name="resumeMethod"
+                               value="paste">
+                        <label for="resumeMethodPaste" class="ml-2">Paste Resume
+                            Content</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resume File Upload -->
+            <div id="fileUploadSection" class="space-y-2">
+                <label for="file" class="block text-lg font-medium">Upload Resume:</label>
+                <input type="file" id="file" name="file" accept=".pdf,.docx"
+                       class="w-full">
+                <span id="fileUploadError" class="error-message hidden">Please upload your resume.</span>
+            </div>
+
+            <!-- Resume Content Paste -->
+            <div id="pasteResumeSection" class="space-y-2 hidden">
+                <label for="resumeContent" class="block text-lg font-medium">Paste Resume
+                    Content:</label>
+                <textarea id="resumeContent" name="resumeContent"
+                          class="w-full px-3 py-2 border rounded-md h-40"></textarea>
+                <span id="resumeContentError" class="error-message hidden">Please paste your resume.</span>
+            </div>
         </div>
-    </footer>
 
-    <!-- JavaScript to Show/Hide Inputs Based on Selections -->
-    <script>
-        function updateJobInputVisibility() {
-            const selectedMethod = document.querySelector('input[name="jobMethod"]:checked').value;
-            document.getElementById('jobUrlSection').classList.toggle('hidden', selectedMethod !== 'url');
-            document.getElementById('pasteJobSection').classList.toggle('hidden', selectedMethod !== 'paste');
+        <!-- Hidden Forms -->
+        <form id="analyzeForm" action="{{ url_for('analyze_keywords') }}" method="POST"
+              enctype="multipart/form-data"></form>
+
+        <form id="coverLetterForm" action="{{ url_for('generate_cover_letter') }}"
+              method="POST" enctype="multipart/form-data"></form>
+
+        <form id="optimizeForm" action="{{ url_for('optimize_resume') }}" method="POST"
+              enctype="multipart/form-data"></form>
+
+        <!-- Action Buttons -->
+        <div class="mt-8 flex flex-wrap gap-4 justify-center">
+            <button onclick="submitForm('analyzeForm')" class="btn btn-indigo px-6 py-2" data-original-text="Analyze Keywords">
+                Analyze Keywords
+            </button>
+            <button onclick="submitForm('coverLetterForm')"
+                    class="btn btn-green px-6 py-2" data-original-text="Generate Cover Letter">
+                Generate Cover Letter
+            </button>
+            <button onclick="submitForm('optimizeForm')" class="btn btn-yellow px-6 py-2" data-original-text="Optimize Resume">
+                Optimize Resume
+            </button>
+        </div>
+    </div>
+</main>
+
+<!-- Spinner Overlay -->
+<div id="spinner" class="spinner-overlay hidden">
+    <div class="spinner"></div>
+</div>
+
+<footer class="bg-gray-800 text-white py-4 mt-auto">
+    <div class="container mx-auto text-center">
+        <p>&copy; 2024 Resume Optimization. All rights reserved.</p>
+    </div>
+</footer>
+
+<script>
+   let isSubmitting = false;
+
+const elements = {
+    spinner: document.getElementById('spinner'),
+    jobDescription: document.getElementById('jobDescription'),
+    file: document.getElementById('file'),
+    resumeContent: document.getElementById('resumeContent'),
+    fileUploadSection: document.getElementById('fileUploadSection'),
+    pasteResumeSection: document.getElementById('pasteResumeSection'),
+    jobDescriptionError: document.getElementById('jobDescriptionError'),
+    fileUploadError: document.getElementById('fileUploadError'),
+    resumeContentError: document.getElementById('resumeContentError')
+};
+
+// Resume visibility toggle
+function updateResumeInputVisibility() {
+    const resumeMethod = document.querySelector('input[name="resumeMethod"]:checked').value;
+    elements.fileUploadSection.classList.toggle('hidden', resumeMethod !== 'upload');
+    elements.pasteResumeSection.classList.toggle('hidden', resumeMethod !== 'paste');
+    elements.fileUploadError.classList.add('hidden');
+    elements.resumeContentError.classList.add('hidden');
+}
+
+document.querySelectorAll('input[name="resumeMethod"]').forEach(el => {
+    el.addEventListener('change', updateResumeInputVisibility);
+});
+
+function showSpinner() {
+    elements.spinner.classList.remove('hidden');
+}
+
+// Validation functions
+function validateInputs() {
+    const jobValid = validateJobInput();
+    const resumeValid = validateResumeInput();
+
+    elements.jobDescriptionError.classList.toggle('hidden', jobValid);
+    const resumeMethod = document.querySelector('input[name="resumeMethod"]:checked').value;
+    if (resumeMethod === 'upload') {
+        elements.fileUploadError.classList.toggle('hidden', resumeValid);
+    } else {
+        elements.resumeContentError.classList.toggle('hidden', resumeValid);
+    }
+
+    return jobValid && resumeValid;
+}
+
+function validateJobInput() {
+    return elements.jobDescription.value.trim() !== '';
+}
+
+function validateResumeInput() {
+    const resumeMethod = document.querySelector('input[name="resumeMethod"]:checked').value;
+    return resumeMethod === 'upload' ?
+        elements.file.files.length > 0 :
+        elements.resumeContent.value.trim() !== '';
+}
+
+function submitForm(formId) {
+    // If already submitting, ignore subsequent clicks
+    if (isSubmitting) return;
+
+    // Validate inputs
+    if (!validateInputs()) return;
+
+    // Set submitting flag
+    isSubmitting = true;
+
+    // Disable all buttons immediately
+    const allButtons = document.querySelectorAll('.btn');
+    allButtons.forEach(button => {
+        button.disabled = true;
+        button.textContent = 'Processing...';
+    });
+
+    // Show spinner
+    showSpinner();
+
+    // Get the form
+    const form = document.getElementById(formId);
+    form.innerHTML = '';
+
+    // Create and submit form
+    createFormData(form, formId);
+    form.submit();
+}
+
+function createFormData(form, formId) {
+    appendHiddenInput(form, 'formType', formId.replace('Form', ''));
+
+    // Add job data
+    appendHiddenInput(form, 'jobMethod', 'paste');
+    appendHiddenInput(form, 'jobDescription', elements.jobDescription.value);
+
+    // Add resume data
+    const resumeMethod = document.querySelector('input[name="resumeMethod"]:checked').value;
+    appendHiddenInput(form, 'resumeMethod', resumeMethod);
+
+    if (resumeMethod === 'upload') {
+        if (elements.file.files.length > 0) {
+            const newFileInput = document.createElement('input');
+            newFileInput.type = 'file';
+            newFileInput.name = 'file';
+            newFileInput.style.display = 'none';
+
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(elements.file.files[0]);
+            newFileInput.files = dataTransfer.files;
+
+            form.appendChild(newFileInput);
         }
+    } else {
+        appendHiddenInput(form, 'resumeContent', elements.resumeContent.value);
+    }
+}
 
-        function updateResumeInputVisibility() {
-            const selectedMethod = document.querySelector('input[name="resumeMethod"]:checked').value;
-            document.getElementById('fileUploadSection').classList.toggle('hidden', selectedMethod !== 'upload');
-            document.getElementById('pasteResumeSection').classList.toggle('hidden', selectedMethod !== 'paste');
-        }
+function appendHiddenInput(form, name, value) {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = name;
+    input.value = value;
+    form.appendChild(input);
+}
 
-        document.querySelectorAll('input[name="jobMethod"]').forEach(el => {
-            el.addEventListener('change', updateJobInputVisibility);
-        });
 
-        document.querySelectorAll('input[name="resumeMethod"]').forEach(el => {
-            el.addEventListener('change', updateResumeInputVisibility);
-        });
+</script>
 
-        document.getElementById('jobForm').addEventListener('submit', function (event) {
-            const jobValid = (document.querySelector('input[name="jobMethod"]:checked').value === 'url' && document.getElementById('jobUrl').value.trim()) ||
-                (document.querySelector('input[name="jobMethod"]:checked').value === 'paste' && document.getElementById('jobDescription').value.trim());
-
-            const resumeValid = (document.querySelector('input[name="resumeMethod"]:checked').value === 'upload' && document.getElementById('file').value.trim()) ||
-                (document.querySelector('input[name="resumeMethod"]:checked').value === 'paste' && document.getElementById('resumeContent').value.trim());
-
-            if (!jobValid || !resumeValid) {
-                event.preventDefault();
-                if (!jobValid) {
-                    document.getElementById('jobUrlError').classList.remove('hidden');
-                    document.getElementById('jobDescriptionError').classList.remove('hidden');
-                }
-                if (!resumeValid) {
-                    document.getElementById('fileUploadError').classList.remove('hidden');
-                    document.getElementById('resumeContentError').classList.remove('hidden');
-                }
-            } else {
-                document.getElementById('spinner').classList.remove('hidden');
-            }
-        });
-    </script>
 </body>
 </html>
+```
