@@ -2,6 +2,7 @@ import requests
 import time
 import os
 import logging
+import re
 from datetime import datetime
 from dotenv import load_dotenv
 from data_models.keywords_model import KeywordsModel
@@ -147,10 +148,15 @@ class SkillsExtractor:
                 skill_name = skill['Name']
                 skill_type = skill['Skill Type']
 
+                cleaned_skill_name = re.sub(r'\(.*?\)', '', skill_name)
+
+                # Strip any extra whitespace
+                cleaned_skill_name = cleaned_skill_name.strip()
+
                 if skill_type == 'Specialized Skill':
-                    hard_skills.append(skill_name)
+                    hard_skills.append(cleaned_skill_name)
                 elif skill_type == 'Common Skill':
-                    soft_skills.append(skill_name)
+                    soft_skills.append(cleaned_skill_name)
 
             keywords_model = KeywordsModel(
                 hard_skills=hard_skills,
@@ -165,48 +171,18 @@ class SkillsExtractor:
             return []
 
 
-
-#
 # if __name__ == '__main__':
 #
 #     extractor = SkillsExtractor()
 #
-#     description = """Qualifications
-# An active Secret security clearance is required in order to qualify for this role
-# 2 years relevant experience with Bachelors in related field; 0 years experience with Masters in related field; or High School Diploma or equivalent and 6 years relevant experience
-# Client requirements: Bachelor’s degree and 2-4 years of experience OR a Master’s degree with 0-2 years of experience
-# In some cases, educational requirements may be adjusted or waived for more than 8 years of applicable work experience
-# Work experience may be adjusted for highly specialized knowledge or uniquely applicable experience
-# An active Secret security clearance is required
-# Interest in data and data analytics
-# Experience with MS Excel functions for data analysis
-# Experience with SQL for data queries
-# Knowledge or interest in Data Dashboards (Tableau, PowerBI, Looker, etc.)
-# Knowledge of scripting (Python)
-# Knowledge of database/technology/processes (PostgreSQL, Apache Kafka, ETL, noSQL databases, etc.)
-# Ability to communicate in person, over virtual platforms, and in writing with teammates, technical Subject Matter Experts (SME), and senior leaders
-# Ability to work in a team environment
-# On-site support required (Must Interface with customers on a daily basis)
-# Benefits
-# Anticipated Salary Range: $70,561.00 - $100,802.00
-# We offer competitive benefits such as best-in-class medical, dental and vision plan choices; wellness resources; employee assistance programs; Savings Plan Options (401(k)); financial planning tools, life insurance; employee discounts; paid holidays and paid time off; tuition reimbursement; as well as early childhood and post-secondary education scholarships
-# Bonus/other non-recurrent compensation is occasionally offered for qualified positions, and if applicable to this role will be addressed by the recruiter at the screening phase of application
-# Responsibilities
-# With advanced technologies to enable mission readiness, HII understands that preparation requires full coordination—not readiness in piece-parts
-# For more than 40 years, the U.S. Navy has entrusted HII to maintain and modernize the vast majority of its fleet
-# With a holistic approach to life-cycle maritime defense systems—from small watercraft to submarines, surface combatants and aircraft carriers—HII ensures a high state of readiness
-# HII Mission Technologies is seeking a Data Engineer with skilled talent to join a team that identifies, develops, manages, and analyzes data (geospatial, force structure, and system characteristic), digital applications, and policy to support virtual, constructive, and gaming simulation-enabled Joint and Combatant Command training
-# This Data Engineer position will assist in improving the processes in which data is collected, managed, and converted for the purposes of the Joint Staff (JS) J7, Deputy Director of Joint Training (DDJT) data initiatives
-# Curation of data from various authoritative sources into schemas and formats that can be consumed by applications of the DDJT’s Joint Training Synthetic Environment (JTSE)
-# Assist in the development of Data Pipelines for data cleaning, transformation, and aggregation
-# Reduce amount of manual touch labor required to transform data into useable formats by enhancing data quality and efficiency
-# Assist in management of DDJT’s data and analytics operations including architecture, user requirements, software development, report development, and Artificial Intelligence (AI)/Machine Learning (ML) integration
+#     description = """
+#     Qualifications Expertise with ETL, SQL and data modelingExperience and appreciation
+#     for robust validation and documentation Strong communication skills to collaborate with technical and non-technical stakeholders Ability to explain complex technical concepts in simple terms A passion for data and its potential to drive business value Ability to work in a fast-paced environment and adapt to evolving business needs Ability to understand and adhere to the Professional Code of Conduct 3+ years of experience in data engineering, with a focus on building data pipelines and data transformations Demonstrated proficiency with dbt, including experience in creating, maintaining, and optimizing dbt models Expertise in Snowflake data warehouse development, including schema design, query optimization, and storage managementStrong knowledge of SQL and experience working with large datasets Strong problem-solving skills and attention to detail, with the ability to work independently and as part of a team Responsibilities At Groups, Data Engineer will work closely with other data engineers, analysts, and software developers As a Data Engineer focusing on dbt development in Snowflake, you will play a pivotal role in supporting care delivery and operations by transforming raw data into meaningful, business-ready datasets This role requires strong experience with SQL query writing, data modeling, dbt, and Snowflake Design, develop, and maintain scalable and optimized data models in dbt and Snowflake Collaborate with business stakeholders, data analysts, and data scientists to understand data requirements and ensure robust data models that meet business needs Implement and maintain dbt best practices, including version control, testing, and documentation to ensure quality and reliability in data pipelinesOptimize Snowflake queries, storage, and performance to ensure efficient data processing and retrieval Continuously monitor and improve the performance of data pipelines and the overall health of the data infrastructureWork with cross-functional teams to resolve data quality issues, implement data governance practices, and ensure data consistency and accuracy Maintain clear and organized documentation for dbt models, transformations, and data workflows
+#
 #      """
 #     print(extractor.extract_skills(description))
-#
-#     # Transform the data
-#     result = extractor.extract_skills(description)
-#
-#     # Print the result
-#     print(result.json(indent=2))
+
+
+
+
 
