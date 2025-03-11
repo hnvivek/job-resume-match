@@ -1,5 +1,6 @@
 import requests
 import time
+import random
 import os
 import logging
 import re
@@ -110,12 +111,16 @@ class SkillsExtractor:
                 "Authorization": f"Bearer {self.token}",
                 "Content-Type": "application/json"
             }
-
+            
             payload = {
                 "text": job_desc,
                 "confidenceThreshold": self.confidence_threshold
             }
 
+            # Generate a random sleep duration between 3 and 10 seconds
+            sleep_duration = random.randint(3, 10)
+            time.sleep(sleep_duration) 
+            
             response = requests.post(self.skills_url, json=payload, headers=headers)
 
             # If we get a 400/401, token might be expired despite our checks
